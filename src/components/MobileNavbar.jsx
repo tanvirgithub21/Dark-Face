@@ -3,17 +3,12 @@ import React, { useState } from "react";
 import {
   FaHome,
   FaUsers,
-  FaUserFriends,
-  FaUserAlt,
   FaBell,
-  FaBars,
 } from "react-icons/fa";
-import Image from "next/image";
 import {
   SignedIn,
   SignedOut,
   SignInButton,
-  SignOutButton,
 } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
 
@@ -76,22 +71,9 @@ const BottomNavbar = () => {
         )}
       </button>
 
+      {/* Profile Section */}
       <SignedIn>
-        {/* Profile Picture with Menu */}
-        <UserButton>
-          <div className="relative">
-            <Image
-              src="/general/avatar.png"
-              alt="Profile"
-              width={35}
-              height={35}
-              className="rounded-full"
-            />
-            <div className="absolute bottom-0 right-0 bg-gray-800 text-white p-1 rounded-full">
-              <FaBars size={12} />
-            </div>
-          </div>
-        </UserButton>
+        <UserButton afterSignOutUrl="/" />
       </SignedIn>
 
       <SignedOut>
