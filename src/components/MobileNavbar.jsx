@@ -9,6 +9,13 @@ import {
   FaBars,
 } from "react-icons/fa";
 import Image from "next/image";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignOutButton,
+} from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
 
 const BottomNavbar = () => {
   const [active, setActive] = useState("home");
@@ -51,42 +58,6 @@ const BottomNavbar = () => {
         )}
       </button>
 
-      {/* Groups Icon */}
-      <button
-        onClick={() => setActive("groups")}
-        className="flex flex-col items-center"
-      >
-        <FaUserFriends
-          size={26}
-          className={
-            active === "groups"
-              ? "text-blue-600"
-              : "text-gray-700 dark:text-gray-300"
-          }
-        />
-        {active === "groups" && (
-          <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
-        )}
-      </button>
-
-      {/* Profile Icon */}
-      <button
-        onClick={() => setActive("profile")}
-        className="flex flex-col items-center"
-      >
-        <FaUserAlt
-          size={26}
-          className={
-            active === "profile"
-              ? "text-blue-600"
-              : "text-gray-700 dark:text-gray-300"
-          }
-        />
-        {active === "profile" && (
-          <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
-        )}
-      </button>
-
       {/* Notifications Icon */}
       <button
         onClick={() => setActive("notifications")}
@@ -105,19 +76,31 @@ const BottomNavbar = () => {
         )}
       </button>
 
-      {/* Profile Picture with Menu */}
-      <div className="relative">
-        <Image
-          src="/general/avatar.png"
-          alt="Profile"
-          width={35}
-          height={35}
-          className="rounded-full"
-        />
-        <div className="absolute bottom-0 right-0 bg-gray-800 text-white p-1 rounded-full">
-          <FaBars size={12} />
-        </div>
-      </div>
+      <SignedIn>
+        {/* Profile Picture with Menu */}
+        <UserButton>
+          <div className="relative">
+            <Image
+              src="/general/avatar.png"
+              alt="Profile"
+              width={35}
+              height={35}
+              className="rounded-full"
+            />
+            <div className="absolute bottom-0 right-0 bg-gray-800 text-white p-1 rounded-full">
+              <FaBars size={12} />
+            </div>
+          </div>
+        </UserButton>
+      </SignedIn>
+
+      <SignedOut>
+        <SignInButton>
+          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300 dark:bg-gray-700 dark:hover:bg-gray-600">
+            Login
+          </button>
+        </SignInButton>
+      </SignedOut>
     </div>
   );
 };
