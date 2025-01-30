@@ -11,11 +11,7 @@ export const connect = async () => {
 
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-      },
+      useUnifiedTopology: true,
     });
     console.log("Connected to MongoDB");
     initialized = true;
