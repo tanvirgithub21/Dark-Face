@@ -1,17 +1,35 @@
-import Post from '../../../../lib/models/post.model.js';
-import { connect } from '../../../../lib/mongodb/mongoose.js';
+import mongoose from "mongoose";
+import Post from "@/lib/models/post.model";
+import { NextResponse } from "next/server";
+import { connect } from "@/lib/mongodb/mongoose";
 
-export const POST = async (req) => {
+export async function GET(req) {
+  console.log("call");
+  // Database Connect
+  await connect();
   try {
-    await connect();
-    const feedPosts = await Post.find().sort({ createdAt: -1 });
-    return new Response(JSON.stringify(feedPosts), {
-      status: 200,
-    });
+    const { searchParams } = new URL(req.url);
+    let excludeIds = searchParams.get("excludeIds");
+    excludeIds = excludeIds ? JSON.parse(excludeIds) : [];
+
+    // Randomly 10 Post Select Kora
+    const posts = await Post.aggregate([
+      {
+        $match: {
+          _id: {
+            $nin: excludeIds.map((id) => new mongoose.Types.ObjectId(id)),
+          },
+        },
+      }, // Already fetched posts exclude
+      { $sort: { createdAt: -1 } }, // Notun post priority pabe
+      { $sample: { size: 3 } }, // Randomly 10 post select
+    ]);
+
+    return NextResponse.json({ posts }, { status: 200 });
   } catch (error) {
-    console.log('Error getting posts:', error);
-    return new Response('Error getting posts', {
-      status: 500,
-    });
+    return NextResponse.json(
+      { message: "Server Error", error },
+      { status: 500 }
+    );
   }
-};
+}

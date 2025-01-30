@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+const nextConfig = {
+    images: {
+      domains: ['img.clerk.com'], // Clerk এর ইমেজ লোডের জন্য অনুমোদিত ডোমেইন
+    },
+  };
+  
+  export default nextConfig;
+  
