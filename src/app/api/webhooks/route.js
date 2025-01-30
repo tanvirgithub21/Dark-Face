@@ -78,6 +78,7 @@ export async function POST(req) {
               userMongoId: user._id,
             },
           });
+          console.log("update metadata")
         } catch (error) {
           console.log("Error updating user metadata:", error);
         }
