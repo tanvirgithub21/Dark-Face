@@ -57,6 +57,7 @@ export async function POST(req) {
   console.log('Webhook body:', body);
 
   if (eventType === 'user.created' || eventType === 'user.updated') {
+    console.log("crate event click")
     const { id, first_name, last_name, image_url, email_addresses, username } =
       evt?.data;
     try {
