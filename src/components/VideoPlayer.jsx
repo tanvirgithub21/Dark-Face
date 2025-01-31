@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa";
 
 const VideoPlayer = (data) => {
+  const videoUrl = data.data.uploadedUrl || "";
   const videoRef = useRef(null);
   const progressRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -78,41 +79,38 @@ const VideoPlayer = (data) => {
 
   return (
     <div
-      className="flex items-center justify-center min-h-full max-h-[80vh]"
+      className="flex items-center justify-center h-full mt-2 overflow-hidden"
       onClick={enableSound}
     >
-      <div className="h-full max-h-full relative">
+      <div className="h-full w-full relative flex justify-center items-center">
         <video
           ref={videoRef}
           onTimeUpdate={updateProgress}
           onLoadedMetadata={updateProgress}
-          className="w-full h-full border-2 rounded-lg dark:border-gray-600"
+          className="w-full h-auto border-2 rounded-lg dark:border-gray-600"
           autoPlay
           loop
           controls={false} // Prevent default controls from showing
         >
-          <source
-            src="https://res.cloudinary.com/dyjecllja/video/upload/v1738268736/nextjs_uploads/obtndh3vo9lqjaoqupvr.mp4"
-            type="video/mp4"
-          />
+          <source src={videoUrl} type="video/mp4" />
         </video>
 
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 flex gap-3">
             <button
-              className="w-12 h-12 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080]  text-2xl"
+              className="w-10 h-10 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080] text-gray-300 text-xl"
               onClick={seekBackward}
             >
               <FaBackward />
             </button>
             <button
               onClick={togglePlay}
-              className="w-12 h-12 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080]  text-2xl"
+              className="w-10 h-10 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080] text-gray-300 text-xl"
             >
               {isPlaying ? <FaPause /> : <FaPlay className="pl-[2px]" />}
             </button>
             <button
-              className="w-12 h-12 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080]  text-2xl"
+              className="w-10 h-10 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080] text-gray-300 text-xl"
               onClick={seekForward}
             >
               <FaForward />
@@ -154,7 +152,7 @@ const VideoPlayer = (data) => {
               </div>
             </div>
 
-            <div className=" w-full h-1">
+            <div className="w-full h-1">
               <div
                 ref={progressRef}
                 className="h-1 bg-gray-600 rounded cursor-pointer w-full relative dark:bg-gray-500"
