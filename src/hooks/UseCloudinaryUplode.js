@@ -13,6 +13,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const checkUrlType = (data) => {
+  // ভিডিও ফরম্যাটের এক্সটেনশন
+  const videoExtensions = /\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i;
+  // ইমেজ ফরম্যাটের এক্সটেনশন
+  const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i;
+
+  if (videoExtensions.test(data?.secure_url)) {
+    return data?.playback_url;
+  } else if (imageExtensions.test(data?.secure_url)) {
+    return data?.secure_url;
+  }
+};
+
 // ✅ **নতুন ফাংশন: ফাইল Cloudinary-তে আপলোড করা**
 export default async function processFileUpload(req) {
   try {
@@ -38,10 +51,12 @@ export default async function processFileUpload(req) {
     const uploadedUrl = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
-          { resource_type: "auto", folder: "nextjs_uploads" },
+          { resource_type: "auto", folder: "Dark-Face" },
           (error, result) => {
             if (error) reject(error);
-            else resolve(result.secure_url);
+            else {
+              resolve(checkUrlType(result));
+            }
           }
         )
         .end(buffer);

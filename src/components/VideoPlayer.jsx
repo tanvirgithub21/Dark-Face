@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React, { useRef, useState, useEffect } from "react";
+import Hls from "hls.js"; // HLS লাইব্রেরি ইমপোর্ট করা হয়েছে
 import {
   FaPlay,
   FaPause,
@@ -14,7 +15,9 @@ import {
 } from "react-icons/fa";
 
 const VideoPlayer = (data) => {
-  const videoUrl = data.data.uploadedUrl || "";
+  // exampal url : https://res.cloudinary.com/dyjecllja/video/upload/sp_auto/v1738354052/Dark-Face/y9dbn6pzf7vbgu1oer36.m3u8
+  const videoUrl = data.data.uploadedUrl;
+
   const videoRef = useRef(null);
   const progressRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -25,13 +28,28 @@ const VideoPlayer = (data) => {
   const [showControls, setShowControls] = useState(false);
   const hideControlsTimeout = useRef(null);
 
-  // Show controls for 3 seconds when the component is first loaded
+  // HLS স্ট্রিমিং লোড করা হচ্ছে
+  useEffect(() => {
+    if (Hls.isSupported()) {
+      const hls = new Hls();
+      hls.loadSource(videoUrl);
+      hls.attachMedia(videoRef.current);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoRef.current.play();
+        setIsPlaying(true);
+      });
+    } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
+      videoRef.current.src = videoUrl;
+      videoRef.current.addEventListener("loadedmetadata", () => {
+        videoRef.current.play();
+        setIsPlaying(true);
+      });
+    }
+  }, []);
+
   useEffect(() => {
     setShowControls(true);
-    const timeout = setTimeout(() => {
-      setShowControls(false);
-    }, 3000);
-    
+    const timeout = setTimeout(() => setShowControls(false), 3000);
     return () => clearTimeout(timeout);
   }, []);
 
@@ -41,7 +59,6 @@ const VideoPlayer = (data) => {
         if (entry.isIntersecting) {
           videoRef.current.play();
           setIsPlaying(true);
-          setShowControls(true); // Show controls when video starts playing
         } else {
           videoRef.current.pause();
           setIsPlaying(false);
@@ -66,14 +83,16 @@ const VideoPlayer = (data) => {
       clearTimeout(hideControlsTimeout.current);
     }
     setShowControls(true);
-    hideControlsTimeout.current = setTimeout(() => setShowControls(false), 2000);
+    hideControlsTimeout.current = setTimeout(
+      () => setShowControls(false),
+      2000
+    );
   };
 
   const togglePlay = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
-      setShowControls(true); // Show controls when playing
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
@@ -90,7 +109,9 @@ const VideoPlayer = (data) => {
   const updateProgress = () => {
     setCurrentTime(videoRef.current.currentTime);
     setDuration(videoRef.current.duration);
-    setProgress((videoRef.current.currentTime / videoRef.current.duration) * 100);
+    setProgress(
+      (videoRef.current.currentTime / videoRef.current.duration) * 100
+    );
   };
 
   return (
@@ -104,12 +125,10 @@ const VideoPlayer = (data) => {
           onTimeUpdate={updateProgress}
           onLoadedMetadata={updateProgress}
           className="w-full h-auto border-2 rounded-lg dark:border-gray-600"
-          autoPlay={false}
+          autoPlay
           loop
           controls={false}
-        >
-          <source src={videoUrl} type="video/mp4" />
-        </video>
+        />
 
         {showControls && (
           <div className="absolute top-0 left-0 w-full h-full">
@@ -137,7 +156,13 @@ const VideoPlayer = (data) => {
             <div className="absolute left-0 bottom-[10px] w-full px-5 text-sm">
               <div className="w-full flex justify-between items-center mb-2">
                 <div className="text-white font-semibold flex items-center gap-1.5">
-                  <Image className="rounded-full border" src="/general/avatar.png" alt="logo" width={24} height={24} />
+                  <Image
+                    className="rounded-full border"
+                    src="/general/avatar.png"
+                    alt="logo"
+                    width={24}
+                    height={24}
+                  />
                   <span>Tanvir Ahmed</span>
                 </div>
                 <FaRegThumbsUp className="text-white text-lg" />
@@ -153,7 +178,11 @@ const VideoPlayer = (data) => {
                   {currentTime.toFixed(2)} / {duration.toFixed(2)}
                 </span>
                 <div onClick={toggleMute}>
-                  {isMuted ? <FaVolumeMute className="text-white text-lg" /> : <FaVolumeUp className="text-white text-lg" />}
+                  {isMuted ? (
+                    <FaVolumeMute className="text-white text-lg" />
+                  ) : (
+                    <FaVolumeUp className="text-white text-lg" />
+                  )}
                 </div>
               </div>
               <div className="w-full h-1">
@@ -162,10 +191,14 @@ const VideoPlayer = (data) => {
                   className="h-1 bg-gray-600 rounded cursor-pointer w-full relative dark:bg-gray-500"
                   onClick={(e) => {
                     const width = progressRef.current.clientWidth;
-                    videoRef.current.currentTime = (e.nativeEvent.offsetX / width) * duration;
+                    videoRef.current.currentTime =
+                      (e.nativeEvent.offsetX / width) * duration;
                   }}
                 >
-                  <div className="absolute top-0 left-0 h-1 bg-blue-500 rounded" style={{ width: `${progress}%` }}></div>
+                  <div
+                    className="absolute top-0 left-0 h-1 bg-blue-500 rounded"
+                    style={{ width: `${progress}%` }}
+                  ></div>
                 </div>
               </div>
             </div>
