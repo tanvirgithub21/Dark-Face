@@ -14,7 +14,6 @@ import {
 } from "react-icons/fa";
 
 const VideoPlayer = (data) => {
-  const { uploadedUrl } = data || {};
   const videoRef = useRef(null);
   const progressRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -26,9 +25,7 @@ const VideoPlayer = (data) => {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = true; // 🔇 Default: Muted (AutoPlay Works)
-      videoRef.current
-        .play()
-        .catch((err) => console.error("AutoPlay Blocked:", err));
+      videoRef.current.play().catch((err) => console.error("AutoPlay Blocked:", err));
     }
   }, []);
 
@@ -48,9 +45,7 @@ const VideoPlayer = (data) => {
   const updateProgress = () => {
     setCurrentTime(videoRef.current.currentTime);
     setDuration(videoRef.current.duration);
-    setProgress(
-      (videoRef.current.currentTime / videoRef.current.duration) * 100
-    );
+    setProgress((videoRef.current.currentTime / videoRef.current.duration) * 100);
   };
 
   const togglePlay = () => {
@@ -79,7 +74,7 @@ const VideoPlayer = (data) => {
 
   return (
     <div
-      className="flex items-center justify-center min-h-full max-h-[80vh]"
+      className="flex items-center justify-center min-h-full max-h-[80vh] bg-gray-900 p-1"
       onClick={enableSound}
     >
       <div className="h-full max-h-full relative">
@@ -90,8 +85,12 @@ const VideoPlayer = (data) => {
           className="w-full h-full border-2 rounded-lg"
           autoPlay
           loop
+          controls={false} // Prevent default controls from showing
         >
-          <source src={uploadedUrl} type="video/mp4" />
+          <source
+            src="https://res.cloudinary.com/dyjecllja/video/upload/v1738268736/nextjs_uploads/obtndh3vo9lqjaoqupvr.mp4"
+            type="video/mp4"
+          />
         </video>
 
         <div className="absolute top-0 left-0 w-full h-full">
