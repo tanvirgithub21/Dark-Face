@@ -18,7 +18,7 @@ import {
 } from "react-icons/fa";
 
 const VideoPlayer = ({ data }) => {
-  const videoUrl = data?.uploadedUrl;
+  const { uploadedUrl, name, text, profileImg } = data;
   const videoRef = useRef(null);
   const progressRef = useRef(null);
   const containerRef = useRef(null);
@@ -33,29 +33,32 @@ const VideoPlayer = ({ data }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const hideControlsTimeout = useRef(null);
 
+
+  console.log({isFullscreen})
+
   // HLS ভিডিও লোড করা হচ্ছে
   useEffect(() => {
-    if (!videoUrl) return;
+    if (!uploadedUrl) return;
 
     const video = videoRef.current;
     setIsLoading(true);
 
     if (Hls.isSupported()) {
       const hls = new Hls();
-      hls.loadSource(videoUrl);
+      hls.loadSource(uploadedUrl);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         setIsLoading(false);
         video.play().catch(() => setIsPlaying(false));
       });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = videoUrl;
+      video.src = uploadedUrl;
       video.addEventListener("loadedmetadata", () => {
         setIsLoading(false);
         video.play().catch(() => setIsPlaying(false));
       });
     }
-  }, [videoUrl]);
+  }, [uploadedUrl]);
 
   useEffect(() => {
     setShowControls(true);
@@ -175,7 +178,7 @@ const VideoPlayer = ({ data }) => {
           controls={false}
         />
 
-        {showControls && (
+        {showControls  && (
           <div className="absolute top-0 left-0 w-full h-full">
             <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 flex gap-3">
               <button
@@ -203,19 +206,19 @@ const VideoPlayer = ({ data }) => {
                 <div className="text-white font-semibold flex items-center gap-1.5">
                   <Image
                     className="rounded-full border"
-                    src="/general/avatar.png"
+                    src={profileImg}
                     alt="logo"
                     width={24}
                     height={24}
                   />
-                  <span>Tanvir Ahmed</span>
+                  <span>{name}</span>
                 </div>
                 <FaRegThumbsUp className="text-white text-lg" />
               </div>
 
               <div className="w-full flex justify-between items-center mb-2">
                 <span className="text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[70%]">
-                  {data?.description || "Default video description"}
+                  {text || "Default video description"}
                 </span>
                 <div onClick={toggleMute}>
                   {isMuted ? (

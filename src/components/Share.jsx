@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useUpload } from "@/hooks/fontend/UseUpload";
 import { useUser } from "@clerk/nextjs";
-import UploadStatus from "./UploadStatus";
+import { useRouter } from "next/navigation";
 
 const Share = () => {
   const [uplodeRssult, setUplodeRssult] = useState(null);
@@ -13,18 +13,27 @@ const Share = () => {
   const [text, setText] = useState("");
   const textAreaRef = useRef(null);
 
+  const router = useRouter();
+
   const { user, isSignedIn, isLoaded } = useUser();
+
+  console.log({ user });
 
   const { uploadFile, loading, error } = useUpload();
 
   const handleUpload = async () => {
-    console.log("post");
+    console.log("enter");
+    if (!user) {
+      return router.push("/sign-in");
+    }
     if (!media) return alert("Please select a file!");
 
     const data = await uploadFile(media, text, user);
     if (data) {
+      setText("");
+      setPreviewURL(null);
+      setMedia(null);
       setUplodeRssult(data);
-      console.log({ data: data });
     }
   };
 
@@ -52,12 +61,34 @@ const Share = () => {
         <div className="flex items-center gap-3 ">
           <div className="mb-auto">
             <div className="relative w-12 h-12 rounded-full overflow-hidden">
-              <Image
-                src="/general/avatar.png"
-                alt="User Avatar"
-                width={48}
-                height={48}
-              />
+              {user?.imageUrl ? (
+                <Image
+                  src={user?.imageUrl}
+                  alt="User Avatar"
+                  width={48}
+                  height={48}
+                />
+              ) : (
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-white"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="8" y1="10" x2="8" y2="14" />
+                    <line x1="16" y1="10" x2="16" y2="14" />
+                    <path d="M12 16c2.2 0 4 1.2 4 2.5S14.2 21 12 21s-4-1.2-4-2.5S9.8 16 12 16z" />
+                  </svg>
+                </div>
+              )}
             </div>
           </div>
           <textarea
@@ -119,11 +150,34 @@ const Share = () => {
             />
           </label>
           <button
-            disabled={!isSignedIn}
+            disabled={loading}
             onClick={handleUpload}
             className="bg-blue-500 text-white px-4 py-2 rounded-full font-bold hover:bg-blue-600"
           >
-            Post
+            {loading ? (
+              <div className="relative w-6 h-6 flex items-center justify-center">
+                {[...Array(8)].map((_, i) => (
+                  <span
+                    key={i}
+                    className="absolute w-1.5 h-1.5 bg-white rounded-full"
+                    style={{
+                      transform: `rotate(${i * 45}deg) translate(9px)`, // ছোট আকারের জন্য কম translate
+                      animation: "pulse 1s infinite ease-in-out",
+                      animationDelay: `${i * 0.12}s`,
+                    }}
+                  ></span>
+                ))}
+                <style>{`
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.3; }
+          100% { opacity: 1; }
+        }
+      `}</style>
+              </div>
+            ) : (
+              "Post"
+            )}
           </button>
         </div>
       </div>
