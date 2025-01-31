@@ -1,15 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import {
-  FaHome,
-  FaUsers,
-  FaBell,
-} from "react-icons/fa";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-} from "@clerk/nextjs";
+import { FaHome, FaUsers, FaBell } from "react-icons/fa";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
 
 const BottomNavbar = () => {
@@ -37,8 +29,8 @@ const BottomNavbar = () => {
 
       {/* Friends Icon */}
       <button
-        onClick={() => setActive("friends")}
-        className="flex flex-col items-center"
+        // onClick={() => setActive("friends")}
+        className="flex flex-col items-center relative"
       >
         <FaUsers
           size={26}
@@ -51,12 +43,13 @@ const BottomNavbar = () => {
         {active === "friends" && (
           <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
         )}
+         <p className="absolute top-0 ring-0 text-[10px] px-0.5 py-0 bg-yellow-300 rounded-2xl text-gray-950">Hold</p>
       </button>
 
       {/* Notifications Icon */}
       <button
-        onClick={() => setActive("notifications")}
-        className="flex flex-col items-center"
+        // onClick={() => setActive("notifications")}
+        className="flex flex-col items-center relative"
       >
         <FaBell
           size={26}
@@ -69,6 +62,7 @@ const BottomNavbar = () => {
         {active === "notifications" && (
           <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
         )}
+        <p className="absolute top-0 ring-0 text-[10px] px-0.5 py-0 bg-yellow-300 rounded-2xl text-gray-950">Hold</p>
       </button>
 
       {/* Profile Section */}
