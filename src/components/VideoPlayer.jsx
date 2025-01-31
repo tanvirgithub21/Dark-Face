@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React, { useRef, useState, useEffect } from "react";
-import Hls from "hls.js"; // HLS লাইব্রেরি ইমপোর্ট করা হয়েছে
+import Hls from "hls.js"; // HLS লাইব্রেরি ইমপোর্ট
 import {
   FaPlay,
   FaPause,
@@ -12,40 +12,50 @@ import {
   FaBackward,
   FaCommentAlt,
   FaRegThumbsUp,
+  FaExpand,
+  FaCompress,
+  FaSpinner,
 } from "react-icons/fa";
 
-const VideoPlayer = (data) => {
-  // exampal url : https://res.cloudinary.com/dyjecllja/video/upload/sp_auto/v1738354052/Dark-Face/y9dbn6pzf7vbgu1oer36.m3u8
-  const videoUrl = data.data.uploadedUrl;
-
+const VideoPlayer = ({ data }) => {
+  const videoUrl = data?.uploadedUrl;
   const videoRef = useRef(null);
   const progressRef = useRef(null);
+  const containerRef = useRef(null);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [showControls, setShowControls] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const hideControlsTimeout = useRef(null);
 
-  // HLS স্ট্রিমিং লোড করা হচ্ছে
+  // HLS ভিডিও লোড করা হচ্ছে
   useEffect(() => {
+    if (!videoUrl) return;
+
+    const video = videoRef.current;
+    setIsLoading(true);
+
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(videoUrl);
-      hls.attachMedia(videoRef.current);
+      hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        videoRef.current.play();
-        setIsPlaying(true);
+        setIsLoading(false);
+        video.play().catch(() => setIsPlaying(false));
       });
-    } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
-      videoRef.current.src = videoUrl;
-      videoRef.current.addEventListener("loadedmetadata", () => {
-        videoRef.current.play();
-        setIsPlaying(true);
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = videoUrl;
+      video.addEventListener("loadedmetadata", () => {
+        setIsLoading(false);
+        video.play().catch(() => setIsPlaying(false));
       });
     }
-  }, []);
+  }, [videoUrl]);
 
   useEffect(() => {
     setShowControls(true);
@@ -57,7 +67,7 @@ const VideoPlayer = (data) => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          videoRef.current.play();
+          videoRef.current.play().catch(() => setIsPlaying(false));
           setIsPlaying(true);
         } else {
           videoRef.current.pause();
@@ -106,6 +116,17 @@ const VideoPlayer = (data) => {
     resetControlsTimer();
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch((err) => console.log(err));
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+    resetControlsTimer();
+  };
+
   const updateProgress = () => {
     setCurrentTime(videoRef.current.currentTime);
     setDuration(videoRef.current.duration);
@@ -114,12 +135,36 @@ const VideoPlayer = (data) => {
     );
   };
 
+  const formatTime = (time) => {
+    if (!time || isNaN(time)) return "00:00";
+    const hours = Math.floor(time / 3600);
+    const minutes = Math.floor((time % 3600) / 60);
+    const seconds = Math.floor(time % 60);
+
+    if (hours > 0) {
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+        2,
+        "0"
+      )}:${String(seconds).padStart(2, "0")}`;
+    }
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
+  };
   return (
     <div
+      ref={containerRef}
       className="flex items-center justify-center h-full mt-2 overflow-hidden"
       onClick={resetControlsTimer}
     >
       <div className="h-full w-full relative flex justify-center items-center">
+        {isLoading && (
+          <div className="absolute flex justify-center items-center w-full h-full bg-black bg-opacity-50">
+            <FaSpinner className="text-white text-4xl animate-spin" />
+          </div>
+        )}
+
         <video
           ref={videoRef}
           onTimeUpdate={updateProgress}
@@ -167,15 +212,10 @@ const VideoPlayer = (data) => {
                 </div>
                 <FaRegThumbsUp className="text-white text-lg" />
               </div>
+
               <div className="w-full flex justify-between items-center mb-2">
-                <span className="text-white whitespace-nowrap overflow-hidden text-ellipsis mr-5">
-                  Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                </span>
-                <FaCommentAlt className="text-white text-2xl" />
-              </div>
-              <div className="w-full flex justify-between items-center mb-2">
-                <span className="text-white font-semibold">
-                  {currentTime.toFixed(2)} / {duration.toFixed(2)}
+                <span className="text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[70%]">
+                  {data?.description || "Default video description"}
                 </span>
                 <div onClick={toggleMute}>
                   {isMuted ? (
@@ -185,21 +225,32 @@ const VideoPlayer = (data) => {
                   )}
                 </div>
               </div>
-              <div className="w-full h-1">
-                <div
-                  ref={progressRef}
-                  className="h-1 bg-gray-600 rounded cursor-pointer w-full relative dark:bg-gray-500"
-                  onClick={(e) => {
-                    const width = progressRef.current.clientWidth;
-                    videoRef.current.currentTime =
-                      (e.nativeEvent.offsetX / width) * duration;
-                  }}
+
+              <div className="w-full flex justify-between items-center mb-2">
+                <span className="text-white font-semibold">
+                  {formatTime(currentTime)} / {formatTime(duration)}
+                </span>
+
+                <button
+                  onClick={toggleFullscreen}
+                  className="text-white text-lg"
                 >
-                  <div
-                    className="absolute top-0 left-0 h-1 bg-blue-500 rounded"
-                    style={{ width: `${progress}%` }}
-                  ></div>
-                </div>
+                  {isFullscreen ? <FaCompress /> : <FaExpand />}
+                </button>
+              </div>
+
+              <div
+                className="w-full h-1 bg-gray-600 rounded cursor-pointer relative dark:bg-gray-500"
+                onClick={(e) => {
+                  const width = progressRef.current.clientWidth;
+                  videoRef.current.currentTime =
+                    (e.nativeEvent.offsetX / width) * duration;
+                }}
+              >
+                <div
+                  className="absolute top-0 left-0 h-1 bg-blue-500 rounded"
+                  style={{ width: `${progress}%` }}
+                ></div>
               </div>
             </div>
           </div>
