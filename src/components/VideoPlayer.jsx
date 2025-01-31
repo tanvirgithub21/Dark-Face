@@ -24,17 +24,33 @@ const VideoPlayer = (data) => {
   const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoRef.current.play();
+          setIsPlaying(true);
+        } else {
+          videoRef.current.pause();
+          setIsPlaying(false);
+        }
+      },
+      { threshold: 0.6 } // 60% ভিডিও দেখা গেলে প্লে হবে
+    );
+
     if (videoRef.current) {
-      videoRef.current.muted = true; // 🔇 Default: Muted (AutoPlay Works)
-      videoRef.current
-        .play()
-        .catch((err) => console.error("AutoPlay Blocked:", err));
+      observer.observe(videoRef.current);
     }
+
+    return () => {
+      if (videoRef.current) {
+        observer.unobserve(videoRef.current);
+      }
+    };
   }, []);
 
   const enableSound = () => {
     if (videoRef.current) {
-      videoRef.current.muted = false; // 🔊 Unmute when user clicks
+      videoRef.current.muted = false;
       setIsMuted(false);
     }
   };
@@ -88,9 +104,9 @@ const VideoPlayer = (data) => {
           onTimeUpdate={updateProgress}
           onLoadedMetadata={updateProgress}
           className="w-full h-auto border-2 rounded-lg dark:border-gray-600"
-          autoPlay
+          autoPlay={false} // Intersection Observer চালাবে
           loop
-          controls={false} // Prevent default controls from showing
+          controls={false}
         >
           <source src={videoUrl} type="video/mp4" />
         </video>
