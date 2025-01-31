@@ -25,12 +25,23 @@ const VideoPlayer = (data) => {
   const [showControls, setShowControls] = useState(false);
   const hideControlsTimeout = useRef(null);
 
+  // Show controls for 3 seconds when the component is first loaded
+  useEffect(() => {
+    setShowControls(true);
+    const timeout = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+    
+    return () => clearTimeout(timeout);
+  }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           videoRef.current.play();
           setIsPlaying(true);
+          setShowControls(true); // Show controls when video starts playing
         } else {
           videoRef.current.pause();
           setIsPlaying(false);
@@ -62,6 +73,7 @@ const VideoPlayer = (data) => {
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
+      setShowControls(true); // Show controls when playing
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
