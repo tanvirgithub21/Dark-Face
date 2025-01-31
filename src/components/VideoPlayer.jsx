@@ -25,7 +25,9 @@ const VideoPlayer = (data) => {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.muted = true; // 🔇 Default: Muted (AutoPlay Works)
-      videoRef.current.play().catch((err) => console.error("AutoPlay Blocked:", err));
+      videoRef.current
+        .play()
+        .catch((err) => console.error("AutoPlay Blocked:", err));
     }
   }, []);
 
@@ -45,7 +47,9 @@ const VideoPlayer = (data) => {
   const updateProgress = () => {
     setCurrentTime(videoRef.current.currentTime);
     setDuration(videoRef.current.duration);
-    setProgress((videoRef.current.currentTime / videoRef.current.duration) * 100);
+    setProgress(
+      (videoRef.current.currentTime / videoRef.current.duration) * 100
+    );
   };
 
   const togglePlay = () => {
@@ -74,7 +78,7 @@ const VideoPlayer = (data) => {
 
   return (
     <div
-      className="flex items-center justify-center min-h-full max-h-[80vh] bg-gray-900 p-1"
+      className="flex items-center justify-center min-h-full max-h-[80vh]"
       onClick={enableSound}
     >
       <div className="h-full max-h-full relative">
@@ -82,7 +86,7 @@ const VideoPlayer = (data) => {
           ref={videoRef}
           onTimeUpdate={updateProgress}
           onLoadedMetadata={updateProgress}
-          className="w-full h-full border-2 rounded-lg"
+          className="w-full h-full border-2 rounded-lg dark:border-gray-600"
           autoPlay
           loop
           controls={false} // Prevent default controls from showing
@@ -96,65 +100,71 @@ const VideoPlayer = (data) => {
         <div className="absolute top-0 left-0 w-full h-full">
           <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 flex gap-3">
             <button
-              className="w-8 h-8 flex justify-center items-center rounded-full bg-[#0000005a]"
+              className="w-12 h-12 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080]  text-2xl"
               onClick={seekBackward}
             >
               <FaBackward />
             </button>
             <button
               onClick={togglePlay}
-              className="w-8 h-8 flex justify-center items-center rounded-full bg-[#0000005a]"
+              className="w-12 h-12 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080]  text-2xl"
             >
               {isPlaying ? <FaPause /> : <FaPlay className="pl-[2px]" />}
             </button>
             <button
-              className="w-8 h-8 flex justify-center items-center rounded-full bg-[#0000005a]"
+              className="w-12 h-12 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080]  text-2xl"
               onClick={seekForward}
             >
               <FaForward />
             </button>
           </div>
 
-          <div className="absolute bottom-[70px] w-full flex justify-between items-center px-5">
-            <div className="text-white text-xs font-semibold flex items-center gap-2">
-              <Image
-                className="rounded-full border"
-                src="/general/avatar.png"
-                alt="logo"
-                width={24}
-                height={24}
-              />
-              <span>Tanvir Ahmed</span>
+          <div className="absolute left-0 bottom-[10px] w-full px-5 text-sm">
+            <div className="w-full flex justify-between items-center mb-2">
+              <div className="text-white font-semibold flex items-center gap-1.5">
+                <Image
+                  className="rounded-full border"
+                  src="/general/avatar.png"
+                  alt="logo"
+                  width={24}
+                  height={24}
+                />
+                <span>Tanvir Ahmed</span>
+              </div>
+              <FaRegThumbsUp className="text-white text-lg" />
             </div>
-            <FaRegThumbsUp />
-          </div>
 
-          <div className="absolute bottom-[45px] w-full flex justify-between items-center px-5">
-            <span className="text-white text-xs whitespace-nowrap overflow-hidden text-ellipsis mr-5">
-              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-            </span>
-            <FaCommentAlt />
-          </div>
-
-          <div className="absolute bottom-[20px] w-full flex justify-between items-center px-5">
-            <span className="text-white text-xs font-semibold">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
-            <div onClick={toggleMute}>
-              {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
+            <div className="w-full flex justify-between items-center mb-2">
+              <span className="text-white whitespace-nowrap overflow-hidden text-ellipsis mr-5">
+                Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              </span>
+              <FaCommentAlt className="text-white text-2xl" />
             </div>
-          </div>
 
-          <div className="absolute bottom-[10px] left-0 w-full h-1">
-            <div
-              ref={progressRef}
-              className="h-1 bg-gray-600 rounded cursor-pointer w-[90%] absolute left-1/2 -translate-x-1/2"
-              onClick={seekVideo}
-            >
+            <div className="w-full flex justify-between items-center mb-2">
+              <span className="text-white font-semibold">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </span>
+              <div onClick={toggleMute}>
+                {isMuted ? (
+                  <FaVolumeMute className="text-white text-lg" />
+                ) : (
+                  <FaVolumeUp className="text-white text-lg" />
+                )}
+              </div>
+            </div>
+
+            <div className=" w-full h-1">
               <div
-                className="absolute top-0 left-0 h-1 bg-blue-500 rounded"
-                style={{ width: `${progress}%` }}
-              ></div>
+                ref={progressRef}
+                className="h-1 bg-gray-600 rounded cursor-pointer w-full relative dark:bg-gray-500"
+                onClick={seekVideo}
+              >
+                <div
+                  className="absolute top-0 left-0 h-1 bg-blue-500 rounded"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
