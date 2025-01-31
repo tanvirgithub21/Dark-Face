@@ -16,7 +16,7 @@ const BottomNavbar = () => {
   const [active, setActive] = useState("home");
 
   return (
-    <div className="fixed bottom-0 left-0 w-full md:hidden bg-white dark:bg-gray-800 shadow-md border-t flex justify-around items-center py-2 md:py-3">
+    <div className="fixed bottom-0 left-0 w-full md:hidden bg-white dark:bg-gray-800 shadow-md border-t flex justify-around items-center py-2 md:py-3 z-50">
       {/* Home Icon */}
       <button
         onClick={() => setActive("home")}

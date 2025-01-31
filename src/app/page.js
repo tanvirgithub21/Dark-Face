@@ -1,6 +1,8 @@
-import NewsFeed from "@/components/Feed";
+import NewsFeed from "@/components/NewsFeed";
 import MobileNavbar from "@/components/MobileNavbar";
 import Share from "@/components/Share";
+import VideoPlayer from "@/components/VideoPlayer";
+import DemoVideo from "@/components/demoVideo";
 
 
 const Homepage = () => {
@@ -8,7 +10,9 @@ const Homepage = () => {
     <div>
       <MobileNavbar />
       <Share />
+      {/* <VideoPlayer/> */}
       <NewsFeed />
+      {/* <DemoVideo/> */}
     </div>
   );
 };
