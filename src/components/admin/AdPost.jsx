@@ -31,9 +31,45 @@ function TextAreaInput({ value, onChange, placeholder }) {
 export default function AdPost() {
   const [category, setCategory] = useState("");
   const [script, setScript] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // For loading state
+  const [error, setError] = useState(""); // For error state
 
   const handleSubmit = async () => {
-    console.log({ category, script });
+    setIsLoading(true); // Start loading
+    setError(""); // Reset previous error message
+    try {
+      // Prepare the data to send to the server
+      const adData = {
+        ad_script: script,
+        category: category,
+      };
+
+      // Make the API request
+      const response = await fetch("/api/ads/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(adData),
+      });
+
+      // Check if the response is successful
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Ad posted successfully:", result);
+        // Optionally, reset the form or show a success message
+        setCategory("");
+        setScript("");
+      } else {
+        console.error("Failed to post ad:", response.statusText);
+        setError("Failed to post ad. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error posting ad:", error);
+      setError("An error occurred. Please try again later.");
+    } finally {
+      setIsLoading(false); // End loading
+    }
   };
 
   return (
@@ -55,11 +91,13 @@ export default function AdPost() {
         onChange={(e) => setScript(e.target.value)}
         placeholder="Enter ad script"
       />
+      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
       <button
         onClick={handleSubmit}
-        className="w-full bg-blue-500 text-white px-4 py-2 rounded"
+        className={`w-full ${isLoading ? "bg-gray-400" : "bg-blue-500"} text-white px-4 py-2 rounded`}
+        disabled={isLoading}
       >
-        Post
+        {isLoading ? "Posting..." : "Post"}
       </button>
     </div>
   );
