@@ -26,5 +26,13 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        ".text-shadow-sm": { textShadow: "0px 0px 3px rgba(0, 0, 0, 0.5)" },
+        ".text-shadow-md": { textShadow: "0px 0px 6px rgba(0, 0, 0, 0.6)" },
+        ".text-shadow-lg": { textShadow: "0px 0px 9px rgba(0, 0, 0, 0.7)" },
+      });
+    },
+  ],
 };

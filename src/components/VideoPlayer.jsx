@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import React, { useRef, useState, useEffect, useContext, createContext } from "react";
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useContext,
+  createContext,
+} from "react";
 import Hls from "hls.js"; // HLS লাইব্রেরি ইমপোর্ট
 import {
   FaPlay,
@@ -99,7 +105,9 @@ const VideoPlayer = ({ data }) => {
   const toggleFullscreen = () => {
     if (typeof window !== "undefined") {
       if (!document.fullscreenElement) {
-        containerRef.current.requestFullscreen().catch((err) => console.log(err));
+        containerRef.current
+          .requestFullscreen()
+          .catch((err) => console.log(err));
         setIsFullscreen(true);
       } else {
         document.exitFullscreen();
@@ -193,16 +201,13 @@ const VideoPlayer = ({ data }) => {
           ref={videoRef}
           onTimeUpdate={updateProgress}
           onLoadedMetadata={updateProgress}
-          className="w-full h-auto border-2 rounded-lg dark:border-gray-600"
+          className="w-full h-auto dark:border-gray-600"
           autoPlay
           loop
           controls={false}
         />
 
-        <div
-          className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#333] to-transparent"
-          style={{ background: "linear-gradient(to top, black 20%, transparent 20%)" }}
-        >
+        <div className="absolute top-0 left-0 w-full h-full ">
           {showControls && (
             <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 flex gap-3">
               <button
@@ -236,7 +241,7 @@ const VideoPlayer = ({ data }) => {
                   width={24}
                   height={24}
                 />
-                <span>{name}</span>
+                <span className="text-shadow-lg" >{name}</span>
               </div>
               <FaRegThumbsUp className="text-white text-lg" />
             </div>
@@ -255,17 +260,17 @@ const VideoPlayer = ({ data }) => {
             </div>
 
             <div className="w-full flex justify-between items-center mb-2">
-              <span className="text-white font-semibold">
+              <span className="text-white font-semibold text-shadow-lg">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
 
-              <button onClick={toggleFullscreen} className="text-white text-lg">
+              <button onClick={toggleFullscreen} className="text-white text-shadow-lg text-lg">
                 {isFullscreen ? <FaCompress /> : <FaExpand />}
               </button>
             </div>
 
             <div
-              className="w-full h-1 bg-gray-600 rounded cursor-pointer relative dark:bg-gray-500"
+              className="w-full h-1 bg-gray-600 rounded cursor-pointer relative dark:bg-gray-500  text-shadow-lg"
               onClick={(e) => {
                 const width = progressRef.current.clientWidth;
                 videoRef.current.currentTime =
@@ -273,7 +278,7 @@ const VideoPlayer = ({ data }) => {
               }}
             >
               <div
-                className="absolute top-0 left-0 h-1 bg-blue-500 rounded"
+                className="absolute text-shadow-lg top-0 left-0 h-1 bg-blue-500 rounded"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>

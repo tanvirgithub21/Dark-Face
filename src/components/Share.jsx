@@ -57,7 +57,7 @@ const Share = () => {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-900 shadow p-4 w-full max-w-2xl mx-auto text-gray-900 dark:text-gray-100 mt-[50px]">
+      <div className="bg-white dark:bg-gray-900 shadow p-4 max-w-lg w-full mx-auto text-gray-900 dark:text-gray-100 mt-[50px]">
         <div className="flex items-center gap-3 ">
           <div className="mb-auto">
             <div className="relative w-12 h-12 rounded-full overflow-hidden">

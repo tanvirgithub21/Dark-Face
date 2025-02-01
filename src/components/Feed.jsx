@@ -1,52 +1,55 @@
-import React from "react";
+"use client";
 
-import { formatDistanceToNow } from "date-fns";
+import { useEffect, useState } from "react";
+import Post from "./Post";
+import Script from "next/script";
 
-export default function Feed(post) {
+export default function PostList() {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    // ডাটাবেজ থেকে ডাটা ফেচ করুন (উদাহরণস্বরূপ লোকাল ডাটা নিচ্ছি)
+    const fetchedPosts = [
+      { id: 1, title: "First Post", content: "This is the first post" },
+      { id: 2, title: "Second Post", content: "This is the second post" },
+      { id: 3, title: "Third Post", content: "This is the third post" },
+      { id: 4, title: "Fourth Post", content: "This is the fourth post" },
+    ];
+    setPosts(fetchedPosts);
+  }, []);
+
   return (
-    <div key={post._id} className="bg-white rounded-xl shadow-md p-4">
-      <div className="flex items-center space-x-3">
-        <img
-          src={post.profileImg}
-          alt={post.name}
-          className="w-10 h-10 rounded-full"
-        />
-        <div>
-          <p className="font-semibold">{post.name}</p>
-          <p className="text-sm text-gray-500">
-            @{post.username} • {formatDistanceToNow(new Date(post.createdAt))}{" "}
-            ago
-          </p>
+    <div>
+      {posts.map((post) => (
+        <div key={post.id}>
+          {/* প্রতিটি পোস্ট কম্পোনেন্ট */}
+          <Post title={post.title} content={post.content} />
+
+          {/* প্রতিটি পোস্টের নিচে অ্যাড দেখাবে */}
+          <div style={{ textAlign: "center", margin: "20px 0" }}>
+            <Script
+              id={`ad-script-${post.id}`}
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  atOptions = {
+                    'key' : '843552e92a2ecbaaf106eb13fde6c909',
+                    'format' : 'iframe',
+                    'height' : 60,
+                    'width' : 468,
+                    'params' : {}
+                  };
+                `,
+              }}
+            />
+            <Script
+              id={`ad-script-js-${post.id}`}
+              strategy="afterInteractive"
+              src="//www.highperformanceformat.com/843552e92a2ecbaaf106eb13fde6c909/invoke.js"
+            />
+          </div>
         </div>
-      </div>
-      <p className="mt-3 text-gray-700">{post.text}</p>
-      {post.uploadedUrl.includes("video") ? (
-        <video
-          src={post.uploadedUrl}
-          controls
-          className="w-full mt-3 rounded-lg"
-        ></video>
-      ) : (
-        <img
-          src={post.uploadedUrl}
-          alt="Uploaded media"
-          className="w-full mt-3 rounded-lg"
-        />
-      )}
-      <div className="flex justify-between items-center mt-3 text-gray-500 text-sm">
-        <button className="flex items-center space-x-1 hover:text-blue-500">
-          <span>👍</span>
-          <span>Like</span>
-        </button>
-        <button className="flex items-center space-x-1 hover:text-blue-500">
-          <span>💬</span>
-          <span>Comment</span>
-        </button>
-        <button className="flex items-center space-x-1 hover:text-blue-500">
-          <span>🔄</span>
-          <span>Share</span>
-        </button>
-      </div>
+      ))}
     </div>
   );
 }

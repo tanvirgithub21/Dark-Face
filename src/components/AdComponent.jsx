@@ -2,7 +2,7 @@ import Script from 'next/script';
 
 const AdComponent = () => {
   return (
-    <div className='h-[60px] w-full relative z-40'>
+    <div className=''>
       {/* Add the script for the advertisement */}
       <Script 
         strategy="afterInteractive"
