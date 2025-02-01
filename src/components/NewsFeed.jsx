@@ -37,7 +37,10 @@ const NewsFeed = () => {
 
       if (data?.posts?.length > 0) {
         setPosts((prevPosts) => [...prevPosts, ...data.posts]);
-        setExcludeIds((prevIds) => [...prevIds, ...data.posts.map((post) => post._id)]);
+        setExcludeIds((prevIds) => [
+          ...prevIds,
+          ...data.posts.map((post) => post._id),
+        ]);
       } else {
         setNoDataInServer(true); // Stop further API calls when no data is available
       }
@@ -56,7 +59,8 @@ const NewsFeed = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (
-        window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 &&
+        window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 100 &&
         !loading &&
         !noDataInServer // Stop fetching if no more data
       ) {
@@ -84,13 +88,25 @@ const NewsFeed = () => {
 
   return (
     <div className="max-w-lg mx-auto p-1 space-y-2 bg-white dark:bg-gray-900">
-      {error && <p className="text-center text-red-500">{error}</p>} {/* Display error message if any */}
+      {error && <p className="text-center text-red-500">{error}</p>}{" "}
+      {/* Display error message if any */}
       {posts.map((post) => (
-        <div key={post._id} className="bg-white dark:bg-gray-800 rounded-sm shadow-md p-2">
+        <div
+          key={post._id}
+          className="bg-white dark:bg-gray-800 rounded-sm shadow-md p-2"
+        >
           <div className="flex items-center space-x-3">
-            <Image src={post.profileImg} alt={post.name} className="w-10 h-10 rounded-full" width={40} height={40} />
+            <Image
+              src={post.profileImg}
+              alt={post.name}
+              className="w-10 h-10 rounded-full"
+              width={40}
+              height={40}
+            />
             <div>
-              <p className="font-semibold text-gray-900 dark:text-white text-sm">{post.name}</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                {post.name}
+              </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 @ {post.username} • {formatTimeShort(post.createdAt)} ago
               </p>
@@ -98,7 +114,7 @@ const NewsFeed = () => {
           </div>
           <p className="mt-3 text-gray-700 dark:text-gray-300">{post.text}</p>
           {post.uploadedUrl.includes("video") ? (
-            <VideoPlayer data={post} />
+            <VideoPlayer key={post._id} data={post} />
           ) : (
             <img
               src={post.uploadedUrl}

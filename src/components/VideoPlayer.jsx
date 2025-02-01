@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useContext, createContext } from "react";
 import Hls from "hls.js"; // HLS লাইব্রেরি ইমপোর্ট
 import {
   FaPlay,
@@ -10,12 +10,14 @@ import {
   FaVolumeMute,
   FaForward,
   FaBackward,
-  FaCommentAlt,
   FaRegThumbsUp,
   FaExpand,
   FaCompress,
   FaSpinner,
 } from "react-icons/fa";
+
+// Create a context to manage the active video
+const ActiveVideoContext = createContext();
 
 const VideoPlayer = ({ data }) => {
   const { uploadedUrl, name, text, profileImg } = data;
@@ -33,30 +35,30 @@ const VideoPlayer = ({ data }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const hideControlsTimeout = useRef(null);
 
-
-  console.log({isFullscreen})
+  // Use the ActiveVideoContext to manage the active video
+  const { activeVideo, setActiveVideo } = useContext(ActiveVideoContext);
 
   // HLS ভিডিও লোড করা হচ্ছে
   useEffect(() => {
-    if (!uploadedUrl) return;
+    if (typeof window !== "undefined" && uploadedUrl) {
+      const video = videoRef.current;
+      setIsLoading(true);
 
-    const video = videoRef.current;
-    setIsLoading(true);
-
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(uploadedUrl);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        setIsLoading(false);
-        video.play().catch(() => setIsPlaying(false));
-      });
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = uploadedUrl;
-      video.addEventListener("loadedmetadata", () => {
-        setIsLoading(false);
-        video.play().catch(() => setIsPlaying(false));
-      });
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(uploadedUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          setIsLoading(false);
+          video.play().catch(() => setIsPlaying(false));
+        });
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = uploadedUrl;
+        video.addEventListener("loadedmetadata", () => {
+          setIsLoading(false);
+          video.play().catch(() => setIsPlaying(false));
+        });
+      }
     }
   }, [uploadedUrl]);
 
@@ -64,31 +66,6 @@ const VideoPlayer = ({ data }) => {
     setShowControls(true);
     const timeout = setTimeout(() => setShowControls(false), 3000);
     return () => clearTimeout(timeout);
-  }, []);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          videoRef.current.play().catch(() => setIsPlaying(false));
-          setIsPlaying(true);
-        } else {
-          videoRef.current.pause();
-          setIsPlaying(false);
-        }
-      },
-      { threshold: 0.6 }
-    );
-
-    if (videoRef.current) {
-      observer.observe(videoRef.current);
-    }
-
-    return () => {
-      if (videoRef.current) {
-        observer.unobserve(videoRef.current);
-      }
-    };
   }, []);
 
   const resetControlsTimer = () => {
@@ -120,12 +97,14 @@ const VideoPlayer = ({ data }) => {
   };
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch((err) => console.log(err));
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
+    if (typeof window !== "undefined") {
+      if (!document.fullscreenElement) {
+        containerRef.current.requestFullscreen().catch((err) => console.log(err));
+        setIsFullscreen(true);
+      } else {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
     }
     resetControlsTimer();
   };
@@ -155,6 +134,48 @@ const VideoPlayer = ({ data }) => {
       "0"
     )}`;
   };
+
+  // IntersectionObserver to handle video visibility
+  useEffect(() => {
+    const video = videoRef.current;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+            // Play the video if it is visible and not already active
+            if (activeVideo !== video) {
+              if (activeVideo) {
+                activeVideo.pause(); // Pause the previously active video
+              }
+              setActiveVideo(video);
+              video.play().catch(() => setIsPlaying(false));
+              setIsPlaying(true);
+            }
+          } else {
+            // Pause the video if it is not visible
+            if (activeVideo === video) {
+              video.pause();
+              setIsPlaying(false);
+              setActiveVideo(null);
+            }
+          }
+        });
+      },
+      { threshold: 0.8 } // Only consider videos visible when 60% is on screen
+    );
+
+    if (video) {
+      observer.observe(video);
+    }
+
+    return () => {
+      if (video) {
+        observer.unobserve(video);
+      }
+    };
+  }, [activeVideo, setActiveVideo]);
+
   return (
     <div
       ref={containerRef}
@@ -178,8 +199,11 @@ const VideoPlayer = ({ data }) => {
           controls={false}
         />
 
-        {showControls  && (
-          <div className="absolute top-0 left-0 w-full h-full">
+        <div
+          className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#333] to-transparent"
+          style={{ background: "linear-gradient(to top, black 20%, transparent 20%)" }}
+        >
+          {showControls && (
             <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 flex gap-3">
               <button
                 className="w-10 h-10 flex justify-center items-center rounded-full bg-[#0000005a] dark:bg-[#00000080] text-gray-300 text-xl"
@@ -200,67 +224,75 @@ const VideoPlayer = ({ data }) => {
                 <FaForward />
               </button>
             </div>
+          )}
 
-            <div className="absolute left-0 bottom-[10px] w-full px-5 text-sm">
-              <div className="w-full flex justify-between items-center mb-2">
-                <div className="text-white font-semibold flex items-center gap-1.5">
-                  <Image
-                    className="rounded-full border"
-                    src={profileImg}
-                    alt="logo"
-                    width={24}
-                    height={24}
-                  />
-                  <span>{name}</span>
-                </div>
-                <FaRegThumbsUp className="text-white text-lg" />
+          <div className="absolute left-0 bottom-[10px] w-full px-5 text-sm">
+            <div className="w-full flex justify-between items-center mb-2">
+              <div className="text-white font-semibold flex items-center gap-1.5">
+                <Image
+                  className="rounded-full border"
+                  src={profileImg}
+                  alt="logo"
+                  width={24}
+                  height={24}
+                />
+                <span>{name}</span>
               </div>
+              <FaRegThumbsUp className="text-white text-lg" />
+            </div>
 
-              <div className="w-full flex justify-between items-center mb-2">
-                <span className="text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[70%]">
-                  {text || "Default video description"}
-                </span>
-                <div onClick={toggleMute}>
-                  {isMuted ? (
-                    <FaVolumeMute className="text-white text-lg" />
-                  ) : (
-                    <FaVolumeUp className="text-white text-lg" />
-                  )}
-                </div>
-              </div>
-
-              <div className="w-full flex justify-between items-center mb-2">
-                <span className="text-white font-semibold">
-                  {formatTime(currentTime)} / {formatTime(duration)}
-                </span>
-
-                <button
-                  onClick={toggleFullscreen}
-                  className="text-white text-lg"
-                >
-                  {isFullscreen ? <FaCompress /> : <FaExpand />}
-                </button>
-              </div>
-
-              <div
-                className="w-full h-1 bg-gray-600 rounded cursor-pointer relative dark:bg-gray-500"
-                onClick={(e) => {
-                  const width = progressRef.current.clientWidth;
-                  videoRef.current.currentTime =
-                    (e.nativeEvent.offsetX / width) * duration;
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 h-1 bg-blue-500 rounded"
-                  style={{ width: `${progress}%` }}
-                ></div>
+            <div className="w-full flex justify-between items-center mb-2">
+              <span className="text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[70%]">
+                {text || "Default video description"}
+              </span>
+              <div onClick={toggleMute}>
+                {isMuted ? (
+                  <FaVolumeMute className="text-white text-lg" />
+                ) : (
+                  <FaVolumeUp className="text-white text-lg" />
+                )}
               </div>
             </div>
+
+            <div className="w-full flex justify-between items-center mb-2">
+              <span className="text-white font-semibold">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </span>
+
+              <button onClick={toggleFullscreen} className="text-white text-lg">
+                {isFullscreen ? <FaCompress /> : <FaExpand />}
+              </button>
+            </div>
+
+            <div
+              className="w-full h-1 bg-gray-600 rounded cursor-pointer relative dark:bg-gray-500"
+              onClick={(e) => {
+                const width = progressRef.current.clientWidth;
+                videoRef.current.currentTime =
+                  (e.nativeEvent.offsetX / width) * duration;
+              }}
+            >
+              <div
+                className="absolute top-0 left-0 h-1 bg-blue-500 rounded"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default VideoPlayer;
+// Create a wrapper component to provide the ActiveVideoContext
+const VideoPlayerWrapper = ({ data }) => {
+  const [activeVideo, setActiveVideo] = useState(null);
+
+  return (
+    <ActiveVideoContext.Provider value={{ activeVideo, setActiveVideo }}>
+      <VideoPlayer data={data} />
+    </ActiveVideoContext.Provider>
+  );
+};
+
+export default VideoPlayerWrapper;
