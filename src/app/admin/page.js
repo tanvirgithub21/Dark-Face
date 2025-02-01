@@ -7,7 +7,7 @@ function Dashboard() {
   const [activeComponent, setActiveComponent] = useState("adPost");
 
   return (
-    <div className="p-5 min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col items-center">
+    <div className="p-5 mt-[56px] min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white flex flex-col items-center">
       <div className="w-full max-w-lg p-4 flex justify-center space-x-4 bg-white dark:bg-gray-800 shadow-lg rounded-xl">
         <button
           onClick={() => setActiveComponent("adPost")}
