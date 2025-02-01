@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import VideoPlayer from "./VideoPlayer";
 import Image from "next/image";
+import AdComponent from "./AdComponent";
 
 const NewsFeed = () => {
   const [posts, setPosts] = useState([]);
@@ -88,55 +89,60 @@ const NewsFeed = () => {
 
   return (
     <div className="max-w-lg mx-auto p-1 space-y-2 bg-white dark:bg-gray-900">
+      <div className="my-1">
+        <AdComponent />
+      </div>
       {error && <p className="text-center text-red-500">{error}</p>}{" "}
       {/* Display error message if any */}
       {posts.map((post) => (
-        <div
-          key={post._id}
-          className="bg-white dark:bg-gray-800 rounded-sm shadow-md p-2"
-        >
-          <div className="flex items-center space-x-3">
-            <Image
-              src={post.profileImg}
-              alt={post.name}
-              className="w-10 h-10 rounded-full"
-              width={40}
-              height={40}
-            />
-            <div>
-              <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                {post.name}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                @ {post.username} • {formatTimeShort(post.createdAt)} ago
-              </p>
+        <>
+          <div
+            key={post._id}
+            className="bg-white dark:bg-gray-800 rounded-sm shadow-md p-2"
+          >
+            <div className="flex items-center space-x-3">
+              <Image
+                src={post.profileImg}
+                alt={post.name}
+                className="w-10 h-10 rounded-full"
+                width={40}
+                height={40}
+              />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                  {post.name}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  @ {post.username} • {formatTimeShort(post.createdAt)} ago
+                </p>
+              </div>
+            </div>
+            <p className="mt-3 text-gray-700 dark:text-gray-300">{post.text}</p>
+            {post.uploadedUrl.includes("video") ? (
+              <VideoPlayer key={post._id} data={post} />
+            ) : (
+              <img
+                src={post.uploadedUrl}
+                alt="Uploaded media"
+                className="w-full max-w-full h-auto max-h-[500px] mt-3 rounded-lg object-cover"
+              />
+            )}
+            <div className="flex justify-between items-center mt-3 text-gray-500 dark:text-gray-400 text-sm">
+              <button className="flex items-center space-x-1 hover:text-blue-500">
+                <span>👍</span>
+                <span>Like</span>
+              </button>
+              <button className="flex items-center space-x-1 hover:text-blue-500">
+                <span>💬</span>
+                <span>Comment</span>
+              </button>
+              <button className="flex items-center space-x-1 hover:text-blue-500">
+                <span>🔄</span>
+                <span>Share</span>
+              </button>
             </div>
           </div>
-          <p className="mt-3 text-gray-700 dark:text-gray-300">{post.text}</p>
-          {post.uploadedUrl.includes("video") ? (
-            <VideoPlayer key={post._id} data={post} />
-          ) : (
-            <img
-              src={post.uploadedUrl}
-              alt="Uploaded media"
-              className="w-full max-w-full h-auto max-h-[500px] mt-3 rounded-lg object-cover"
-            />
-          )}
-          <div className="flex justify-between items-center mt-3 text-gray-500 dark:text-gray-400 text-sm">
-            <button className="flex items-center space-x-1 hover:text-blue-500">
-              <span>👍</span>
-              <span>Like</span>
-            </button>
-            <button className="flex items-center space-x-1 hover:text-blue-500">
-              <span>💬</span>
-              <span>Comment</span>
-            </button>
-            <button className="flex items-center space-x-1 hover:text-blue-500">
-              <span>🔄</span>
-              <span>Share</span>
-            </button>
-          </div>
-        </div>
+        </>
       ))}
       {loading && (
         <div className="flex justify-center items-center">
