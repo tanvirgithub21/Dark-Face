@@ -8,6 +8,43 @@ import { BiSolidDonateHeart } from "react-icons/bi";
 import { FaRegComment } from "react-icons/fa6";
 
 const NewsFeed = () => {
+  const [isActive, setIsActive] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  // Function to set a random time interval (5 to 10 minutes)
+  const setRandomTimer = () => {
+    const randomTime = Math.floor(Math.random() * (10 - 5 + 1) + 5) * 60; // Convert minutes to seconds
+    setCountdown(randomTime);
+
+    const timer = setTimeout(() => {
+      setIsActive(true);
+    }, randomTime * 1000); // Convert seconds to milliseconds
+
+    return () => clearTimeout(timer);
+  };
+
+  // Run effect once on mount and whenever isActive becomes false
+  useEffect(() => {
+    setRandomTimer();
+  }, [isActive]); // Re-run when isActive changes to false
+
+  // Countdown Timer
+  useEffect(() => {
+    if (countdown > 0) {
+      const interval = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [countdown]);
+
+  // Function to handle click and open Google in a new tab
+  const handleClick = () => {
+    if (!isActive) return;
+    setIsActive(false); // Set state to false
+    window.open("https://www.google.com", "_blank"); // Open Google in a new tab
+  };
+
   const [posts, setPosts] = useState([]);
   const [excludeIds, setExcludeIds] = useState(new Set());
   const [loading, setLoading] = useState(false);
@@ -94,7 +131,13 @@ const NewsFeed = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900">
+    <div
+      onClick={handleClick}
+      className="relative max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900"
+    >
+      <div className="absolute top-3 right-3 bg-yellow-600 rounded text-white text-xs">
+        {countdown}
+      </div>
       {error && <p className="text-center text-red-500">{error}</p>}
       {posts.map((post) => (
         <div
