@@ -13,6 +13,7 @@ import {
   FaVolumeMute,
   FaVolumeUp,
 } from "react-icons/fa";
+import { MdPublic } from "react-icons/md";
 
 let activeVideo = null;
 
@@ -150,9 +151,20 @@ export default function TestVideoPlayer({ data }) {
   };
 
   const handleSeek = (e) => {
-    const seekTime = (e.target.value / 100) * duration;
-    videoRef.current.currentTime = seekTime;
-    setProgress(e.target.value);
+    console.log(e);
+    const div = e.currentTarget; // Progress bar div
+    const totalWidth = div.offsetWidth; // div-এর মোট প্রস্থ
+    const clickX = e.clientX - div.getBoundingClientRect().left; // ক্লিকের X পজিশন
+
+    const progress = (clickX / totalWidth) * 100; // পার্সেন্ট ক্যালকুলেশন
+    const seekTime = (progress / 100) * duration; // ভিডিওর সময় হিসাব
+
+    videoRef.current.currentTime = seekTime; // ভিডিওর সময় আপডেট করুন
+    setProgress(progress); // State আপডেট করুন
+
+    console.log(
+      `Seek to: ${progress.toFixed(2)}% - Time: ${seekTime.toFixed(2)}s`
+    );
   };
 
   useEffect(() => {
@@ -214,43 +226,58 @@ export default function TestVideoPlayer({ data }) {
           </div>
         )}
 
-        <div className="absolute left-0 bottom-[10px] w-full">
-          <div className="w-full px-5 text-sm flex justify-between items-center mb-2">
-            <div className="text-white font-semibold flex items-center gap-1.5">
-              <Image
-                className="rounded-full border"
-                src={profileImg}
-                alt="logo"
-                width={24}
-                height={24}
-              />
-              <span className=" text-shadow-lg">{name}</span>
+        <div className="absolute px-5 pt-3 left-0 bottom-0 w-full flex flex-col gap-0.5 bg-gradient-to-b from-[#00000002] to-[#000000ca]">
+          <div className="flex items-end justify-between mb-2 ">
+            {/* left side */}
+            <div className="flex flex-col gap-1.5"> 
+              <div className="text-white font-semibold flex items-center gap-1.5">
+                <Image
+                  className="rounded-full border"
+                  src={profileImg}
+                  alt="logo"
+                  width={24}
+                  height={24}
+                />
+                <p className="text-sm font-normal text-shadow-lg">{name}</p>
+                <p>
+                  <MdPublic className="text-xs" />
+                </p>
+              </div>
+              <p className="text-white text-sm overflow-hidden line-clamp-2 text-ellipsis mr-10 text-shadow-lg font-extralight">
+                {text || "Default video description"}
+              </p>
+              <p className="text-white text-xs font-extralight text-shadow-lg">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </p>
             </div>
-            <FaRegThumbsUp className="text-white text-lg" />
-          </div>
-          <div className="w-full px-5 text-sm flex justify-between items-center mb-2">
-            <span className="text-white whitespace-nowrap overflow-hidden text-ellipsis max-w-[80%] text-shadow-lg font-extralight">
-              {text || "Default video description"}
-            </span>
-            <button onClick={toggleFullscreen} className="text-white text-lg ">
-              {isFullscreen ? (
-                <FaCompress className=" text-shadow-lg" />
-              ) : (
-                <FaExpand className=" text-shadow-lg" />
-              )}
-            </button>
+            {/* right side */}
+            <div className="flex flex-col gap-4">
+              <FaRegThumbsUp className="text-white text-lg" />
+              <div onClick={toggleMute}>
+                {isMuted ? (
+                  <FaVolumeMute className="text-white text-lg" />
+                ) : (
+                  <FaVolumeUp className="text-white text-lg" />
+                )}
+              </div>
+              <button
+                onClick={toggleFullscreen}
+                className="text-white text-shadow-lg text-lg"
+              >
+                {isFullscreen ? <FaCompress /> : <FaExpand />}
+              </button>
+            </div>
           </div>
 
-          <div className=" w-full px-5 text-sm">
-            <input
-              ref={progressRef}
-              type="range"
-              min="0"
-              max="100"
-              value={progress}
+          <div className=" w-full text-sm relative mb-2.5">
+            <div
               onChange={handleSeek}
               className="w-full h-1 bg-gray-300 rounded-full appearance-none cursor-pointer"
-            />
+            ></div>
+            <div
+              className="absolute text-shadow-lg top-1/2 left-0 -translate-y-1/2 h-1 bg-blue-500 rounded"
+              style={{ width: `${progress}%` }}
+            ></div>
           </div>
         </div>
       </div>
