@@ -37,8 +37,6 @@ export default async function processFileUpload(req) {
     const profileImg = formData.get("profileImg"); // প্রোফাইল ইমেজ
     const userMongoId = formData.get("userMongoId"); // ইউজার ID
 
-    console.log({ text, name, userMongoId, username, profileImg });
-
     if (!file) {
       throw new Error("No file provided");
     }
@@ -48,21 +46,23 @@ export default async function processFileUpload(req) {
     const buffer = Buffer.from(bytes);
 
     // **Cloudinary-তে আপলোড করার জন্য ফাইল লোকাল স্টোরেজে রাখতে হবে**
-    const uploadedUrl = await new Promise((resolve, reject) => {
+    const promiseResult = await new Promise((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
           { resource_type: "auto", folder: "Dark-Face" },
           (error, result) => {
             if (error) reject(error);
             else {
-              resolve(checkUrlType(result));
+              const uploadedUrl = checkUrlType(result)
+              const {resource_type, width,height} = result
+              const finalResult = {uploadedUrl, resource_type, width, height}
+              resolve(finalResult);
             }
           }
         )
         .end(buffer);
     });
-
-    return { text, name, userMongoId, username, profileImg, uploadedUrl };
+    return { text, name, userMongoId, username, profileImg, ...promiseResult };
   } catch (error) {
     throw new Error("File upload failed: " + error.message);
   }

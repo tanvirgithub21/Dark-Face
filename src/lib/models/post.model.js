@@ -7,6 +7,19 @@ const postSchema = new mongoose.Schema(
     },
     uploadedUrl: {
       type: String,
+      require: true
+    },
+    resourceType: {
+      type: String,
+      require: true
+    },
+    width: {
+      type: Number,
+      require: true
+    },
+    height: {
+      type: Number,
+      require: true
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

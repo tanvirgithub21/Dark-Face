@@ -18,7 +18,7 @@ import { MdPublic } from "react-icons/md";
 let activeVideo = null;
 
 export default function TestVideoPlayer({ data }) {
-  const { uploadedUrl, name, text, profileImg } = data;
+  const { uploadedUrl, name, text, profileImg, height } = data;
 
   const videoRef = useRef(null);
   const progressRef = useRef(null);
@@ -142,7 +142,7 @@ export default function TestVideoPlayer({ data }) {
     )}`;
   };
 
-  const updateProgress = () => {
+  const updateProgress = (e) => {
     setCurrentTime(videoRef.current.currentTime);
     setDuration(videoRef.current.duration);
     setProgress(
@@ -151,7 +151,6 @@ export default function TestVideoPlayer({ data }) {
   };
 
   const handleSeek = (e) => {
-    console.log(e);
     const div = e.currentTarget; // Progress bar div
     const totalWidth = div.offsetWidth; // div-এর মোট প্রস্থ
     const clickX = e.clientX - div.getBoundingClientRect().left; // ক্লিকের X পজিশন
@@ -161,10 +160,6 @@ export default function TestVideoPlayer({ data }) {
 
     videoRef.current.currentTime = seekTime; // ভিডিওর সময় আপডেট করুন
     setProgress(progress); // State আপডেট করুন
-
-    console.log(
-      `Seek to: ${progress.toFixed(2)}% - Time: ${seekTime.toFixed(2)}s`
-    );
   };
 
   useEffect(() => {
@@ -184,10 +179,17 @@ export default function TestVideoPlayer({ data }) {
     );
   };
 
+  const videoHeight = (value) => {
+    const num = Number(value); // Ensure the value is a number
+    if (num < 300) return 300;
+    if (num > 650) return 650;
+    return num;
+  };
+
   return (
     <div
       onClick={resetControlsTimer}
-      className="relative w-full h-[300px] mt-2 flex justify-center items-center bg-black"
+      className={`relative w-full h-[${videoHeight(height)}px] mt-2 flex justify-center items-center bg-black`}
     >
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center text-white">
@@ -229,7 +231,7 @@ export default function TestVideoPlayer({ data }) {
         <div className="absolute px-5 pt-3 left-0 bottom-0 w-full flex flex-col gap-0.5 bg-gradient-to-b from-[#00000002] to-[#000000ca]">
           <div className="flex items-end justify-between mb-2 ">
             {/* left side */}
-            <div className="flex flex-col gap-1.5"> 
+            <div className="flex flex-col gap-1.5">
               <div className="text-white font-semibold flex items-center gap-1.5">
                 <Image
                   className="rounded-full border"

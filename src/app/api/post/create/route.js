@@ -6,8 +6,17 @@ import processFileUpload from "@/hooks/UseCloudinaryUplode.js";
 export const POST = async (req) => {
   const user = await currentUser();
   try {
-    const { text, name, userMongoId, username, profileImg, uploadedUrl } =
-      await processFileUpload(req);
+    const {
+      text,
+      name,
+      userMongoId,
+      username,
+      profileImg,
+      uploadedUrl,
+      resource_type,
+      width,
+      height,
+    } = await processFileUpload(req);
 
     await connect();
 
@@ -16,6 +25,7 @@ export const POST = async (req) => {
         status: 401,
       });
     }
+
     const newPost = await Post.create({
       user: userMongoId,
       name: name,
@@ -23,6 +33,9 @@ export const POST = async (req) => {
       text: text,
       profileImg: profileImg,
       uploadedUrl: uploadedUrl,
+      resourceType: resource_type,
+      height,
+      width,
     });
     await newPost.save();
     return new Response(JSON.stringify(newPost), {

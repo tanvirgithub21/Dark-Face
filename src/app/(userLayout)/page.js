@@ -5,7 +5,7 @@ import Share from "@/components/Share";
 
 const Homepage = () => {
   return (
-    <div>
+    <div  >
       <MobileNavbar />
       <Share />
       <NewsFeed />

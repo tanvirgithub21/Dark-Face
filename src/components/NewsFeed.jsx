@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import VideoPlayer from "./VideoPlayer";
 import Image from "next/image";
+import { BiLike } from "react-icons/bi";
+import { BiSolidDonateHeart } from "react-icons/bi";
+import { FaRegComment } from "react-icons/fa6";
 
 const NewsFeed = () => {
   const [posts, setPosts] = useState([]);
-  const [excludeIds, setExcludeIds] = useState([]);
+  const [excludeIds, setExcludeIds] = useState(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [noDataInServer, setNoDataInServer] = useState(false);
@@ -20,7 +23,7 @@ const NewsFeed = () => {
     try {
       console.log("Fetching posts...");
       const res = await fetch(
-        `/api/post/all?excludeIds=${JSON.stringify(excludeIds)}`
+        `/api/post/all?excludeIds=${JSON.stringify([...excludeIds])}`
       );
 
       if (!res.ok) {
@@ -32,11 +35,21 @@ const NewsFeed = () => {
       const data = await res.json();
 
       if (data?.posts?.length > 0) {
-        setPosts((prevPosts) => [...prevPosts, ...data.posts]);
-        setExcludeIds((prevIds) => [
-          ...prevIds,
-          ...data.posts.map((post) => post._id),
-        ]);
+        const newPosts = data.posts.filter((post) => !excludeIds.has(post._id));
+
+        if (newPosts.length > 0) {
+          setPosts((prevPosts) => {
+            const updatedPosts = [...prevPosts, ...newPosts];
+            return Array.from(
+              new Map(updatedPosts.map((post) => [post._id, post])).values()
+            );
+          });
+
+          setExcludeIds(
+            (prevIds) =>
+              new Set([...prevIds, ...newPosts.map((post) => post._id)])
+          );
+        }
       } else {
         setNoDataInServer(true);
       }
@@ -106,7 +119,9 @@ const NewsFeed = () => {
                 </p>
               </div>
             </div>
-            <p className="line-clamp-2 overflow-hidden text-ellipsis mt-2 text-sm text-gray-700 dark:text-gray-300">{post.text}</p>
+            <p className="line-clamp-2 overflow-hidden text-ellipsis mt-2 text-sm text-gray-700 dark:text-gray-300">
+              {post.text}
+            </p>
           </div>
           {post.uploadedUrl.includes("video") ? (
             <VideoPlayer key={post._id} data={post} />
@@ -117,15 +132,22 @@ const NewsFeed = () => {
               className="w-full max-w-full h-auto max-h-[500px] mt-3 object-cover"
             />
           )}
-          <div className="flex justify-between items-center mt-3 text-gray-500 dark:text-gray-400 text-sm px-2 pb-2">
-            <button className="flex items-center space-x-1 hover:text-blue-500">
-              👍 Like
+          <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 text-sm px-3 py-1">
+            <button className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+              <BiLike className="mr-1 text-base" /> Like
             </button>
-            <button className="flex items-center space-x-1 hover:text-blue-500">
-              💬 Comment
+            <button className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+              <FaRegComment className="mr-1 text-base" /> Comment
             </button>
-            <button className="flex items-center space-x-1 hover:text-blue-500">
-              🔄 Share
+            <button className="w-[32%] h-8 rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+              <a
+                className="flex justify-center items-center text-sm "
+                href="http://google.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <BiSolidDonateHeart className="mr-1 text-base" /> Support
+              </a>
             </button>
           </div>
         </div>
