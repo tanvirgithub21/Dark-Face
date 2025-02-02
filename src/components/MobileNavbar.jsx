@@ -1,11 +1,38 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaHome, FaUsers, FaBell } from "react-icons/fa";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
 
 const BottomNavbar = () => {
   const [active, setActive] = useState("home");
+
+  const [secondsLeft, setSecondsLeft] = useState(50); // 30 সেকেন্ড থেকে কাউন্টডাউন শুরু
+
+  useEffect(() => {
+    const countdown = setInterval(() => {
+      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 30)); // 0 হলে 30-এ রিসেট হবে
+    }, 1000); // প্রতি 1 সেকেন্ডে কাউন্ট কমবে
+
+    const timeout = setTimeout(() => {
+      window.open("https://google.com", "_blank");
+
+      const interval = setInterval(() => {
+        setSecondsLeft(30); // 30 থেকে আবার কাউন্টডাউন শুরু
+        window.open("https://google.com", "_blank");
+      }, 30000);
+
+      return () => clearInterval(interval);
+    }, 50000);
+
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(countdown);
+    };
+  }, []);
+
+  console.log(secondsLeft)
+  
 
   return (
     <div className="fixed top-0 left-0 w-full md:hidden bg-white dark:bg-gray-800 shadow-md border-b border-[#0000001d] dark:border-[#ffffff14] flex justify-around items-center py-2 md:py-3 z-50">
@@ -62,7 +89,7 @@ const BottomNavbar = () => {
         {active === "notifications" && (
           <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
         )}
-        <p className="absolute top-0 ring-0 text-[10px] px-0.5 py-0 bg-yellow-300 rounded-2xl text-gray-950">Hold</p>
+        <p className="absolute top-0 ring-0 text-[10px] px-0.5 py-0 bg-yellow-300 rounded-2xl text-gray-950">{secondsLeft}</p>
       </button>
 
       {/* Profile Section */}

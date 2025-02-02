@@ -133,13 +133,13 @@ const NewsFeed = () => {
             />
           )}
           <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 text-sm px-3 py-1">
-            <button className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+            <button className="w-[32%] h-8 cursor-pointer flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
               <BiLike className="mr-1 text-base" /> Like
             </button>
-            <button className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+            <button className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
               <FaRegComment className="mr-1 text-base" /> Comment
             </button>
-            <button className="w-[32%] h-8 rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+            <button className="w-[32%] h-8 cursor-pointer rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
               <a
                 className="flex justify-center items-center text-sm "
                 href="http://google.com/"
