@@ -42,7 +42,10 @@ const NewsFeed = () => {
   const handleClick = () => {
     if (!isActive) return;
     setIsActive(false); // Set state to false
-    window.open("https://www.google.com", "_blank"); // Open Google in a new tab
+    window.open(
+      "https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce",
+      "_blank"
+    ); // Open Google in a new tab
   };
 
   const [posts, setPosts] = useState([]);
@@ -132,12 +135,9 @@ const NewsFeed = () => {
 
   return (
     <div
-      onClick={handleClick}
+      onTouchStar={handleClick}
       className="relative max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900"
     >
-      <div className="absolute top-3 right-3 bg-yellow-600 rounded text-white text-xs">
-        {countdown}
-      </div>
       {error && <p className="text-center text-red-500">{error}</p>}
       {posts.map((post) => (
         <div
@@ -185,7 +185,7 @@ const NewsFeed = () => {
             <button className="w-[32%] h-8 cursor-pointer rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
               <a
                 className="flex justify-center items-center text-sm "
-                href="http://google.com/"
+                href="https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
                 target="_blank"
                 rel="noopener noreferrer"
               >
