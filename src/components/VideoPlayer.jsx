@@ -16,6 +16,7 @@ import {
 import { MdPublic } from "react-icons/md";
 
 let activeVideo = null;
+const bufferAheadTime = 15; // 10-15 সেকেন্ড সামনের ডাটা লোড হবে
 
 export default function TestVideoPlayer({ data }) {
   const { uploadedUrl, name, text, profileImg, height } = data;
@@ -32,6 +33,7 @@ export default function TestVideoPlayer({ data }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [buffered, setBuffered] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -52,26 +54,27 @@ export default function TestVideoPlayer({ data }) {
     const checkVisibleVideo = () => {
       const videos = document.querySelectorAll("video");
       const screenCenter = window.innerHeight / 2;
-      const upperBound = screenCenter - 100;
-      const lowerBound = screenCenter + 100;
-    
+      const upperBound = screenCenter - 20;
+      const lowerBound = screenCenter + 20;
+
       let bestVideo = null;
       let maxVisibleHeight = 0;
-    
+
       videos.forEach((video) => {
         const rect = video.getBoundingClientRect();
         const videoTop = rect.top;
         const videoBottom = rect.bottom;
-    
+
         // ভিডিওর কতটুকু অংশ ২০০px রেঞ্জের মধ্যে আছে তা বের করছি
-        const visiblePart = Math.min(videoBottom, lowerBound) - Math.max(videoTop, upperBound);
-    
+        const visiblePart =
+          Math.min(videoBottom, lowerBound) - Math.max(videoTop, upperBound);
+
         if (visiblePart > maxVisibleHeight) {
           maxVisibleHeight = visiblePart;
           bestVideo = video;
         }
       });
-    
+
       // যদি কোনো ভিডিও ২০০px রেঞ্জের মধ্যে না থাকে, সব ভিডিও বন্ধ করবো
       if (!bestVideo) {
         videos.forEach((video) => {
@@ -80,7 +83,7 @@ export default function TestVideoPlayer({ data }) {
         });
         return;
       }
-    
+
       // বাকি সব ভিডিও বন্ধ করে শুধু bestVideo চালু করবো
       videos.forEach((video) => {
         if (video === bestVideo) {
@@ -94,7 +97,20 @@ export default function TestVideoPlayer({ data }) {
         }
       });
     };
-    
+
+    // ভিডিও প্লে হলে সামনের ১০-১৫ সেকেন্ড পর্যন্ত ডাটা লোড
+    const handleBufferAhead = () => {
+      if (videoRef.current && isPlaying) {
+        const currentTime = videoRef.current.currentTime;
+        const bufferEnd = currentTime + bufferAheadTime;
+        if (videoRef.current.buffered.length > 0) {
+          const bufferedEnd = videoRef.current.buffered.end(0);
+          if (bufferedEnd < bufferEnd) {
+            videoRef.current.currentTime = bufferedEnd; // যতটুকু বাফার আছে সেখানে স্কিপ করবো
+          }
+        }
+      }
+    };
 
     const handleManualPlay = () => {
       if (activeVideo && activeVideo !== videoElement) {
@@ -108,13 +124,14 @@ export default function TestVideoPlayer({ data }) {
     window.addEventListener("scroll", checkVisibleVideo);
     window.addEventListener("resize", checkVisibleVideo);
     videoElement.addEventListener("play", handleManualPlay);
+    videoElement.addEventListener("waiting", handleBufferAhead);
 
     checkVisibleVideo();
-
     return () => {
       window.removeEventListener("scroll", checkVisibleVideo);
       window.removeEventListener("resize", checkVisibleVideo);
       videoElement.removeEventListener("play", handleManualPlay);
+      videoElement.removeEventListener("waiting", handleBufferAhead);
     };
   }, [uploadedUrl]);
 
@@ -161,6 +178,12 @@ export default function TestVideoPlayer({ data }) {
     setProgress(
       (videoRef.current.currentTime / videoRef.current.duration) * 100
     );
+    if (videoRef.current.buffered.length > 0) {
+      const bufferedEnd = videoRef.current.buffered.end(
+        videoRef.current.buffered.length - 1
+      );
+      setBuffered((bufferedEnd / videoRef.current.duration) * 100);
+    }
   };
 
   const handleSeek = (e) => {
@@ -202,7 +225,9 @@ export default function TestVideoPlayer({ data }) {
   return (
     <div
       onClick={resetControlsTimer}
-      className={`relative w-full h-[${videoHeight(height)}px] mt-2 flex justify-center items-center bg-black`}
+      className={`relative w-full h-[${videoHeight(
+        height
+      )}px] mt-2 flex justify-center items-center bg-black`}
     >
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center text-white">
@@ -213,6 +238,7 @@ export default function TestVideoPlayer({ data }) {
         ref={videoRef}
         onTimeUpdate={updateProgress}
         onLoadedMetadata={updateProgress}
+        preload="metadata"
         className="w-full h-full object-cover"
         muted
         loop
@@ -285,14 +311,17 @@ export default function TestVideoPlayer({ data }) {
           </div>
 
           <div className=" w-full text-sm relative mb-2.5">
-            <div
-              onChange={handleSeek}
-              className="w-full h-1 bg-gray-300 rounded-full appearance-none cursor-pointer"
-            ></div>
-            <div
-              className="absolute text-shadow-lg top-1/2 left-0 -translate-y-1/2 h-1 bg-blue-500 rounded"
-              style={{ width: `${progress}%` }}
-            ></div>
+            <div onClick={handleSeek}>
+              <div className="w-full h-1 bg-gray-300 rounded-full appearance-none cursor-pointer"></div>
+              <div
+                className="absolute text-shadow-lg top-1/2 left-0 -translate-y-1/2 h-1 bg-red-600 rounded"
+                style={{ width: `${buffered}%` }}
+              ></div>
+              <div
+                className="absolute text-shadow-lg top-1/2 left-0 -translate-y-1/2 h-1 bg-blue-500 rounded"
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
           </div>
         </div>
       </div>
