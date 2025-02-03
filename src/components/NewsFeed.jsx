@@ -41,11 +41,7 @@ const NewsFeed = () => {
   // Function to handle click and open Google in a new tab
   const handleClick = () => {
     if (!isActive) return;
-    setIsActive(false); // Set state to false
-    window.open(
-      "https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce",
-      "_blank"
-    ); // Open Google in a new tab
+    setIsActive(false);
   };
 
   const [posts, setPosts] = useState([]);
@@ -134,67 +130,116 @@ const NewsFeed = () => {
   };
 
   return (
-    <div
-      onTouchStar={handleClick}
-      className="relative max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900"
-    >
+    <div className="relative max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900">
       {error && <p className="text-center text-red-500">{error}</p>}
-      {posts.map((post) => (
-        <div
-          key={post._id}
-          className="bg-white dark:bg-gray-800 rounded-sm shadow-md"
-        >
-          <div className="px-2 pt-2">
-            <div className="flex items-center space-x-3">
-              <Image
-                src={post.profileImg}
-                alt={post.name}
-                className="w-10 h-10 rounded-full"
-                width={40}
-                height={40}
-              />
-              <div>
-                <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                  {post.name}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  @ {post.username} • {formatTimeShort(post.createdAt)} ago
-                </p>
+      {posts.map((post) => {
+        const girlFullNames = [
+          "Emma Johnson",
+          "Olivia Smith",
+          "Ava Williams",
+          "Sophia Brown",
+          "Isabella Jones",
+          "Mia Miller",
+          "Charlotte Davis",
+          "Amelia Wilson",
+          "Harper Anderson",
+          "Evelyn Thomas",
+          "Abigail White",
+          "Ella Harris",
+          "Scarlett Martin",
+          "Grace Thompson",
+          "Lily Garcia",
+          "Hannah Martinez",
+          "Aria Robinson",
+          "Madison Clark",
+          "Chloe Rodriguez",
+          "Aubrey Lewis",
+          "Zoey Walker",
+          "Nora Hall",
+          "Layla Allen",
+          "Riley Young",
+          "Victoria King",
+          "Stella Wright",
+          "Lucy Scott",
+          "Natalie Green",
+          "Penelope Adams",
+          "Brooklyn Nelson",
+        ];
+
+        const name =
+          post.name == (null || "")
+            ? girlFullNames[Math.floor(Math.random() * girlFullNames.length)]
+            : post.name;
+
+        return (
+          <div
+            key={post._id}
+            className="bg-white dark:bg-gray-800 rounded-sm shadow-md"
+          >
+            <div className="px-2 pt-2">
+              <div className="flex items-center space-x-3">
+                <Image
+                  src={post.profileImg}
+                  alt={name}
+                  className="w-10 h-10 rounded-full"
+                  width={40}
+                  height={40}
+                />
+                <div>
+                  <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                    {name}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    @ {post.username} • {formatTimeShort(post.createdAt)} ago
+                  </p>
+                </div>
               </div>
+              <p className="line-clamp-2 overflow-hidden text-ellipsis mt-2 text-sm text-gray-700 dark:text-gray-300">
+                {post.text}
+              </p>
             </div>
-            <p className="line-clamp-2 overflow-hidden text-ellipsis mt-2 text-sm text-gray-700 dark:text-gray-300">
-              {post.text}
-            </p>
+            {post.uploadedUrl.includes("video") ? (
+              <VideoPlayer key={post._id} data={{ ...post, name }} />
+            ) : (
+              <img
+                src={post.uploadedUrl}
+                alt="Uploaded media"
+                className="w-full max-w-full h-auto max-h-[500px] mt-3 object-cover"
+              />
+            )}
+            <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 text-sm px-3 py-1">
+              <button className="w-[32%] h-8 cursor-pointer flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+                <BiLike className="mr-1 text-base" /> Like
+              </button>
+              <button className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+                <FaRegComment className="mr-1 text-base" /> Comment
+              </button>
+              <button className="w-[32%] h-8 cursor-pointer rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+                <a
+                  className="flex justify-center items-center text-sm "
+                  href="https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <BiSolidDonateHeart className="mr-1 text-base" /> Support
+                </a>
+              </button>
+            </div>
           </div>
-          {post.uploadedUrl.includes("video") ? (
-            <VideoPlayer key={post._id} data={post} />
-          ) : (
-            <img
-              src={post.uploadedUrl}
-              alt="Uploaded media"
-              className="w-full max-w-full h-auto max-h-[500px] mt-3 object-cover"
-            />
-          )}
-          <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 text-sm px-3 py-1">
-            <button className="w-[32%] h-8 cursor-pointer flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
-              <BiLike className="mr-1 text-base" /> Like
-            </button>
-            <button className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
-              <FaRegComment className="mr-1 text-base" /> Comment
-            </button>
-            <button className="w-[32%] h-8 cursor-pointer rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
-              <a
-                className="flex justify-center items-center text-sm "
-                href="https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <BiSolidDonateHeart className="mr-1 text-base" /> Support
-              </a>
-            </button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
+
+      {isActive && (
+        <a
+          onClick={handleClick}
+          href="https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <div className="w-full h-full absolute top-0 left-0 bg-[#00000001]"></div>
+        </a>
+      )}
+
       {loading && (
         <div className="flex justify-center items-center">
           <div className="w-8 h-8 border-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div>

@@ -6,7 +6,6 @@ import { UserButton } from "@clerk/nextjs";
 
 const BottomNavbar = () => {
   const [active, setActive] = useState("home");
-  
 
   return (
     <div className="fixed top-0 left-0 w-full md:hidden bg-white dark:bg-gray-800 shadow-md border-b border-[#0000001d] dark:border-[#ffffff14] flex justify-around items-center py-2 md:py-3 z-50">

@@ -13,13 +13,10 @@ const Share = () => {
   const [text, setText] = useState("");
   const textAreaRef = useRef(null);
 
+  
   const router = useRouter();
-
-  const { user, isSignedIn, isLoaded } = useUser();
-
-  console.log({ user });
-
-  const { uploadFile, loading, error } = useUpload();
+  const { user } = useUser();
+  const { uploadFile, loading } = useUpload();
 
   const handleUpload = async () => {
     console.log("enter");
@@ -57,7 +54,7 @@ const Share = () => {
 
   return (
     <>
-      <div className="bg-white dark:bg-gray-900 p-4 max-w-lg  mx-auto text-gray-900 dark:text-gray-100 mt-[50px]">
+      <div className="bg-white dark:bg-gray-900 p-4 w-full mx-auto text-gray-900 dark:text-gray-100 mt-[50px]">
         <div className="flex items-center gap-3 ">
           <div className="mb-auto">
             <div className="relative w-12 h-12 rounded-full overflow-hidden">
