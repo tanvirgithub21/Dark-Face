@@ -16,13 +16,11 @@ import {
 import { MdPublic } from "react-icons/md";
 
 let activeVideo = null;
-const bufferAheadTime = 15; // 10-15 সেকেন্ড সামনের ডাটা লোড হবে
 
 export default function TestVideoPlayer({ data }) {
   const { uploadedUrl, name, text, profileImg, height } = data;
 
-  const videoRef = useRef(null);
-  const progressRef = useRef(null);
+  const videoRef = useRef(null);;
   const hideControlsTimeout = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -33,7 +31,6 @@ export default function TestVideoPlayer({ data }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [buffered, setBuffered] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -98,20 +95,6 @@ export default function TestVideoPlayer({ data }) {
       });
     };
 
-    // ভিডিও প্লে হলে সামনের ১০-১৫ সেকেন্ড পর্যন্ত ডাটা লোড
-    const handleBufferAhead = () => {
-      if (videoRef.current && isPlaying) {
-        const currentTime = videoRef.current.currentTime;
-        const bufferEnd = currentTime + bufferAheadTime;
-        if (videoRef.current.buffered.length > 0) {
-          const bufferedEnd = videoRef.current.buffered.end(0);
-          if (bufferedEnd < bufferEnd) {
-            videoRef.current.currentTime = bufferedEnd; // যতটুকু বাফার আছে সেখানে স্কিপ করবো
-          }
-        }
-      }
-    };
-
     const handleManualPlay = () => {
       if (activeVideo && activeVideo !== videoElement) {
         activeVideo.pause();
@@ -124,14 +107,12 @@ export default function TestVideoPlayer({ data }) {
     window.addEventListener("scroll", checkVisibleVideo);
     window.addEventListener("resize", checkVisibleVideo);
     videoElement.addEventListener("play", handleManualPlay);
-    videoElement.addEventListener("waiting", handleBufferAhead);
 
     checkVisibleVideo();
     return () => {
       window.removeEventListener("scroll", checkVisibleVideo);
       window.removeEventListener("resize", checkVisibleVideo);
       videoElement.removeEventListener("play", handleManualPlay);
-      videoElement.removeEventListener("waiting", handleBufferAhead);
     };
   }, [uploadedUrl]);
 
@@ -178,12 +159,7 @@ export default function TestVideoPlayer({ data }) {
     setProgress(
       (videoRef.current.currentTime / videoRef.current.duration) * 100
     );
-    if (videoRef.current.buffered.length > 0) {
-      const bufferedEnd = videoRef.current.buffered.end(
-        videoRef.current.buffered.length - 1
-      );
-      setBuffered((bufferedEnd / videoRef.current.duration) * 100);
-    }
+   
   };
 
   const handleSeek = (e) => {
@@ -238,7 +214,7 @@ export default function TestVideoPlayer({ data }) {
         ref={videoRef}
         onTimeUpdate={updateProgress}
         onLoadedMetadata={updateProgress}
-        preload="metadata"
+        preload="auto"
         className="w-full h-full object-cover"
         muted
         loop
@@ -313,10 +289,6 @@ export default function TestVideoPlayer({ data }) {
           <div className=" w-full text-sm relative mb-2.5">
             <div onClick={handleSeek} onTouchStart={handleSeek} >
               <div className="w-full h-1 bg-gray-300 rounded-full appearance-none cursor-pointer"></div>
-              <div
-                className="absolute text-shadow-lg top-1/2 left-0 -translate-y-1/2 h-1 bg-red-600 rounded"
-                style={{ width: `${buffered}%` }}
-              ></div>
               <div
                 className="absolute text-shadow-lg top-1/2 left-0 -translate-y-1/2 h-1 bg-blue-500 rounded"
                 style={{ width: `${progress}%` }}
