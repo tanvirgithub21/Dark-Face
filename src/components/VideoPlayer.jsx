@@ -311,7 +311,7 @@ export default function TestVideoPlayer({ data }) {
           </div>
 
           <div className=" w-full text-sm relative mb-2.5">
-            <div onClick={handleSeek}>
+            <div onClick={handleSeek} onTouchStart={handleSeek} >
               <div className="w-full h-1 bg-gray-300 rounded-full appearance-none cursor-pointer"></div>
               <div
                 className="absolute text-shadow-lg top-1/2 left-0 -translate-y-1/2 h-1 bg-red-600 rounded"
