@@ -20,17 +20,18 @@ let activeVideo = null;
 export default function TestVideoPlayer({ data, isActive }) {
   const { uploadedUrl, name, text, profileImg, height } = data;
 
-  const videoRef = useRef(null);;
+  const videoRef = useRef(null);
   const hideControlsTimeout = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [showControls, setShowControls] = useState(false);
-  const [isMuted, setIsMuted] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
+  
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -131,17 +132,25 @@ export default function TestVideoPlayer({ data, isActive }) {
     setIsMuted(videoRef.current.muted);
   };
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      videoRef.current
-        .requestFullscreen()
-        .catch((err) => console.error("Fullscreen error:", err));
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
+const toggleFullscreen = () => {
+  const videoContainer = videoRef.current.parentElement; // ভিডিওর wrapper container
+  if (!document.fullscreenElement) {
+    if (videoContainer.requestFullscreen) {
+      videoContainer.requestFullscreen();
+    } else if (videoContainer.mozRequestFullScreen) { // Firefox
+      videoContainer.mozRequestFullScreen();
+    } else if (videoContainer.webkitRequestFullscreen) { // Chrome, Safari
+      videoContainer.webkitRequestFullscreen();
+    } else if (videoContainer.msRequestFullscreen) { // IE/Edge
+      videoContainer.msRequestFullscreen();
     }
-  };
+    setIsFullscreen(true);
+  } else {
+    document.exitFullscreen();
+    setIsFullscreen(false);
+  }
+};
+
 
   const formatTime = (time) => {
     if (!time || isNaN(time)) return "00:00";
@@ -159,7 +168,6 @@ export default function TestVideoPlayer({ data, isActive }) {
     setProgress(
       (videoRef.current.currentTime / videoRef.current.duration) * 100
     );
-   
   };
 
   const handleSeek = (e) => {
@@ -194,7 +202,7 @@ export default function TestVideoPlayer({ data, isActive }) {
   const videoHeight = (value) => {
     const num = Number(value); // Ensure the value is a number
     if (num < 300) return 300;
-    if (num > 650) return 650;
+    if (num > 600) return 600;
     return num;
   };
 
@@ -252,34 +260,38 @@ export default function TestVideoPlayer({ data, isActive }) {
                   className="rounded-full border"
                   src={profileImg}
                   alt="logo"
-                  width={24}
-                  height={24}
+                  width={36}
+                  height={36}
                 />
-                <p className="text-sm font-normal text-shadow-lg">{name}</p>
+                <p className="text-base font-normal text-shadow-lg">{name}</p>
                 <p>
-                  <MdPublic className={`text-xs animate-spin ${ isActive && "duration-1000"} `} />
+                  <MdPublic
+                    className={`text-xs${
+                      isActive && " animate-spin duration-1000"
+                    } `}
+                  />
                 </p>
               </div>
-              <p className="text-white text-sm overflow-hidden line-clamp-2 text-ellipsis mr-10 text-shadow-lg font-extralight">
+              <p className="text-white text-sm overflow-hidden line-clamp-2 text-ellipsis mr-10 text-shadow-lg font-light">
                 {text || "Default video description"}
               </p>
-              <p className="text-white text-xs font-extralight text-shadow-lg">
+              <p className="text-white text-sm font-extralight text-shadow-lg">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </p>
             </div>
             {/* right side */}
-            <div className="flex flex-col gap-4">
-              <FaRegThumbsUp className="text-white text-lg" />
+            <div className="flex flex-col gap-6 mb-3">
+              <FaRegThumbsUp className="text-white text-2xl" />
               <div onClick={toggleMute}>
                 {isMuted ? (
-                  <FaVolumeMute className="text-white text-lg" />
+                  <FaVolumeMute className="text-white text-2xl" />
                 ) : (
-                  <FaVolumeUp className="text-white text-lg" />
+                  <FaVolumeUp className="text-white text-2xl" />
                 )}
               </div>
               <button
                 onClick={toggleFullscreen}
-                className="text-white text-shadow-lg text-lg"
+                className="text-white text-shadow-lg text-2xl"
               >
                 {isFullscreen ? <FaCompress /> : <FaExpand />}
               </button>
@@ -287,7 +299,7 @@ export default function TestVideoPlayer({ data, isActive }) {
           </div>
 
           <div className=" w-full text-sm relative mb-2.5">
-            <div onClick={handleSeek} onTouchStart={handleSeek} >
+            <div onClick={handleSeek} onTouchStart={handleSeek}>
               <div className="w-full h-1 bg-gray-300 rounded-full appearance-none cursor-pointer"></div>
               <div
                 className="absolute text-shadow-lg top-1/2 left-0 -translate-y-1/2 h-1 bg-blue-500 rounded"
