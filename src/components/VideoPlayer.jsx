@@ -51,37 +51,50 @@ export default function TestVideoPlayer({ data }) {
 
     const checkVisibleVideo = () => {
       const videos = document.querySelectorAll("video");
-      let mostCenteredVideo = null;
-      let minDistanceFromCenter = Infinity;
-
+      const screenCenter = window.innerHeight / 2;
+      const upperBound = screenCenter - 100;
+      const lowerBound = screenCenter + 100;
+    
+      let bestVideo = null;
+      let maxVisibleHeight = 0;
+    
       videos.forEach((video) => {
         const rect = video.getBoundingClientRect();
-        const videoCenter = rect.top + rect.height / 2;
-        const screenCenter = window.innerHeight / 2;
-        const distanceFromCenter = Math.abs(videoCenter - screenCenter);
-
-        if (distanceFromCenter < minDistanceFromCenter) {
-          minDistanceFromCenter = distanceFromCenter;
-          mostCenteredVideo = video;
+        const videoTop = rect.top;
+        const videoBottom = rect.bottom;
+    
+        // ভিডিওর কতটুকু অংশ ২০০px রেঞ্জের মধ্যে আছে তা বের করছি
+        const visiblePart = Math.min(videoBottom, lowerBound) - Math.max(videoTop, upperBound);
+    
+        if (visiblePart > maxVisibleHeight) {
+          maxVisibleHeight = visiblePart;
+          bestVideo = video;
         }
       });
-
+    
+      // যদি কোনো ভিডিও ২০০px রেঞ্জের মধ্যে না থাকে, সব ভিডিও বন্ধ করবো
+      if (!bestVideo) {
+        videos.forEach((video) => {
+          video.pause();
+          video.muted = true;
+        });
+        return;
+      }
+    
+      // বাকি সব ভিডিও বন্ধ করে শুধু bestVideo চালু করবো
       videos.forEach((video) => {
-        if (video === mostCenteredVideo) {
+        if (video === bestVideo) {
           if (video.paused) {
-            video
-              .play()
-              .catch((error) => console.error("Error playing:", error));
+            video.play();
             video.muted = false;
           }
         } else {
-          if (!video.paused) {
-            video.pause();
-            video.muted = true;
-          }
+          video.pause();
+          video.muted = true;
         }
       });
     };
+    
 
     const handleManualPlay = () => {
       if (activeVideo && activeVideo !== videoElement) {
