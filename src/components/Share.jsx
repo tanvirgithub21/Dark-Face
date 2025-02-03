@@ -95,6 +95,7 @@ const Share = () => {
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
+          
         </div>
 
         {previewURL && (

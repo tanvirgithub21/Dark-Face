@@ -7,3 +7,47 @@ body {
   
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes glowEyes {
+  0% { filter: drop-shadow(0 0 5px #0ff); }
+  50% { filter: drop-shadow(0 0 15px #0ff); }
+  100% { filter: drop-shadow(0 0 5px #0ff); }
+}
+
+@keyframes smileMove {
+  0% { d: path("M110 170 Q150 200, 190 170"); }
+  50% { d: path("M110 180 Q150 210, 190 180"); }
+  100% { d: path("M110 170 Q150 200, 190 170"); }
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 300px; }
+}
+
+.eye {
+  fill: #0ff;
+  animation: glowEyes 1.5s infinite alternate;
+}
+
+.smile {
+  fill: none;
+  stroke: #0ff;
+  stroke-width: 4;
+  filter: drop-shadow(0 0 10px #0ff);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: smileMove 2s infinite ease-in-out;
+}
+
+.typing-text {
+  font-family: 'Courier New', monospace;
+  font-size: 50px;
+  font-weight: bold;
+  fill: #0ff;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: typing 4s steps(16) 1s 1 normal both;
+  text-anchor: middle;
+  alignment-baseline: middle;
+}
