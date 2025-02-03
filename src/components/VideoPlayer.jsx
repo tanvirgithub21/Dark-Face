@@ -17,7 +17,7 @@ import { MdPublic } from "react-icons/md";
 
 let activeVideo = null;
 
-export default function TestVideoPlayer({ data }) {
+export default function TestVideoPlayer({ data, isActive }) {
   const { uploadedUrl, name, text, profileImg, height } = data;
 
   const videoRef = useRef(null);;
@@ -257,7 +257,7 @@ export default function TestVideoPlayer({ data }) {
                 />
                 <p className="text-sm font-normal text-shadow-lg">{name}</p>
                 <p>
-                  <MdPublic className="text-xs" />
+                  <MdPublic className={`text-xs animate-spin ${ isActive && "duration-1000"} `} />
                 </p>
               </div>
               <p className="text-white text-sm overflow-hidden line-clamp-2 text-ellipsis mr-10 text-shadow-lg font-extralight">

@@ -199,7 +199,7 @@ const NewsFeed = () => {
               </p>
             </div>
             {post.uploadedUrl.includes("video") ? (
-              <VideoPlayer key={post._id} data={{ ...post, name }} />
+              <VideoPlayer key={post._id} data={{ ...post, name }} isActive={isActive} />
             ) : (
               <img
                 src={post.uploadedUrl}
