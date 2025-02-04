@@ -23,4 +23,4 @@ const SVGComponent = (props) => (
     </text>
   </svg>
 );
-export default LogoSvg;
+export default SVGComponent;
