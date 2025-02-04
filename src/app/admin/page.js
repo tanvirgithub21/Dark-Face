@@ -1,6 +1,7 @@
 "use client";
 import AddPost from "@/components/admin/AddPost";
 import AdPost from "@/components/admin/AdPost";
+import CloudinaryConfigForm from "@/components/admin/CloudinaryConfigForm";
 import { useState } from "react";
 
 function Dashboard() {
@@ -23,17 +24,28 @@ function Dashboard() {
           onClick={() => setActiveComponent("addPost")}
           className={
             activeComponent === "addPost"
-              ? "bg-green-600 text-white px-4 py-2 rounded"
-              : "bg-green-300 text-black dark:bg-green-800 dark:text-white px-4 py-2 rounded"
+              ? "bg-blue-600 text-white px-4 py-2 rounded"
+              : "bg-blue-300 text-black dark:bg-blue-800 dark:text-white px-4 py-2 rounded"
           }
         >
           Add Post
+        </button>
+        <button
+          onClick={() => setActiveComponent("addDb")}
+          className={
+            activeComponent === "addDb"
+              ? "bg-blue-600 text-white px-4 py-2 rounded"
+              : "bg-blue-300 text-black dark:bg-blue-800 dark:text-white px-4 py-2 rounded"
+          }
+        >
+          Add DB
         </button>
       </div>
 
       <div className="mt-5 w-full max-w-2xl p-6 bg-white dark:bg-gray-800 shadow-xl rounded-xl">
         {activeComponent === "adPost" && <AdPost />}
         {activeComponent === "addPost" && <AddPost />}
+        {activeComponent === "addDb" && <CloudinaryConfigForm />}
       </div>
     </div>
   );
