@@ -121,8 +121,6 @@ export const POST = async (req) => {
       ? text
       : videoTitles[Math.floor(Math.random() * videoTitles.length)];
 
-      console.log(filterTitle)
-
     const newPost = await Post.create({
       user: userMongoId,
       name: name,

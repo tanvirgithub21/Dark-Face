@@ -98,7 +98,8 @@ export default async function processFileUpload(req) {
     }
 
     // ডাটাবেস আপডেট করা
-    await config.save();
+    const conData = await config.save();
+    console.log(conData)
 
     // রিটার্ন ডাটা
     return {
