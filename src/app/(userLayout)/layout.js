@@ -30,7 +30,7 @@ export const metadata = {
     images: ["https://dark-face.vercel.app/twitter-image.jpg"],
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon-16x16.png",
   },
 };
 
