@@ -6,6 +6,7 @@ import Image from "next/image";
 import { BiLike } from "react-icons/bi";
 import { BiSolidDonateHeart } from "react-icons/bi";
 import { FaRegComment } from "react-icons/fa6";
+import ResponsiveImage from "./ResponsiveImage";
 
 const NewsFeed = () => {
   const [isActive, setIsActive] = useState(false);
@@ -199,31 +200,31 @@ const NewsFeed = () => {
               </p>
             </div>
             {post.uploadedUrl.includes("video") ? (
-              <VideoPlayer key={post._id} data={{ ...post, name }} isActive={isActive} />
-            ) : (
-              <img
-                src={post.uploadedUrl}
-                alt="Uploaded media"
-                className="w-full max-w-full h-auto max-h-[500px] mt-3 object-cover"
+              <VideoPlayer
+                key={post._id}
+                data={{ ...post, name }}
+                isActive={isActive}
               />
+            ) : (
+              <ResponsiveImage src={post.uploadedUrl} alt="Uploaded media" />
             )}
             <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 text-sm px-3 py-1">
-              <button className="w-[32%] h-8 cursor-pointer flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+              <div className="w-[32%] h-8 cursor-pointer flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
                 <BiLike className="mr-1 text-base" /> Like
-              </button>
-              <button className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+              </div>
+              <div className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
                 <FaRegComment className="mr-1 text-base" /> Comment
-              </button>
-              <button className="w-[32%] h-8 cursor-pointer rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
+              </div>
+              <div className="w-[32%] flex justify-center items-start h-8 cursor-pointer rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
                 <a
-                  className="flex justify-center items-center text-sm "
+                  className="flex justify-center items-center my-auto text-sm "
                   href="https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <BiSolidDonateHeart className="mr-1 text-base" /> Support
                 </a>
-              </button>
+              </div>
             </div>
           </div>
         );
