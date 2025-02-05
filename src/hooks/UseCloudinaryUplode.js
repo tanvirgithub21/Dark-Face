@@ -1,108 +1,98 @@
 import { v2 as cloudinary } from "cloudinary";
-import CloudinaryConfig from "@/lib/models/db.model"; // আপনার CloudinaryConfig মডেল
-import { connect } from "@/lib/mongodb/mongoose"; // MongoDB সংযোগ
+import CloudinaryConfig from "@/lib/models/db.model"; // Your CloudinaryConfig model
+import { connect } from "@/lib/mongodb/mongoose"; // MongoDB connection
 
 export const config = {
   api: {
-    bodyParser: false, // `formData` ব্যবহার করার জন্য `bodyParser` বন্ধ রাখা
+    bodyParser: false, // Disable `bodyParser` to use `formData`
   },
 };
 
-// ফাইল টাইপ চেক করা
+// Check file type
 const checkUrlType = (data) => {
   const videoExtensions = /\.(mp4|mov|avi|wmv|flv|webm|mkv)$/i;
   const imageExtensions = /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i;
 
-  if (videoExtensions.test(data?.secure_url)) {
-    return data?.playback_url;
-  } else if (imageExtensions.test(data?.secure_url)) {
-    return data?.secure_url;
-  }
+  return videoExtensions.test(data?.secure_url)
+    ? data?.playback_url
+    : imageExtensions.test(data?.secure_url)
+    ? data?.secure_url
+    : null;
 };
 
-// ✅ ফাইল আপলোড করার ফাংশন
+// ✅ Function to handle file upload
 export default async function processFileUpload(req) {
   try {
-    const formData = await req.formData(); // ফর্ম ডাটা নিন
-    const file = formData.get("file"); // ফাইল
-    const text = formData.get("text"); // পোস্ট টেক্সট
-    const name = formData.get("name"); // ইউজারের নাম
-    const username = formData.get("username"); // ইউজারনেম
-    const profileImg = formData.get("profileImg"); // প্রোফাইল ছবি
-    const userMongoId = formData.get("userMongoId"); // ইউজারের MongoDB আইডি
+    const formData = await req.formData();
+    const file = formData.get("file");
+    const text = formData.get("text");
+    const name = formData.get("name");
+    const username = formData.get("username");
+    const profileImg = formData.get("profileImg");
+    const userMongoId = formData.get("userMongoId");
 
-    if (!file) {
-      throw new Error("No file provided");
-    }
+    if (!file) throw new Error("No file provided, please upload a file.");
 
-    // **ডাটাবেস থেকে কনফিগ নির্বাচন করা**
+    // **Retrieve configuration from the database**
     await connect();
-    const config = await CloudinaryConfig.findOne({ status: true });
+    let config = await CloudinaryConfig.findOne({ status: true });
 
     if (!config) {
-      throw new Error("No active Cloudinary configuration found!");
+      config = await CloudinaryConfig.findOneAndUpdate(
+        { file: { $lt: 12 }, status: false },
+        { status: true },
+        { new: true }
+      );
+      if (!config) throw new Error("Upload limit exceeded! Please add a new configuration.");
     }
 
-    // **Cloudinary কনফিগ সেট করা ডাটাবেস থেকে**
+    // **Set Cloudinary config from the database**
     cloudinary.config({
-      cloud_name: config.cloudName, // cloudName ডাটাবেস থেকে
-      api_key: config.apiKey, // apiKey ডাটাবেস থেকে
-      api_secret: config.apiSecret, // apiSecret ডাটাবেস থেকে
+      cloud_name: config.cloudName,
+      api_key: config.apiKey,
+      api_secret: config.apiSecret,
     });
 
-    // **Buffer এ ফাইল রিড করা**
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    // **Read file into a buffer**
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    // **Cloudinary-তে ফাইল আপলোড করা**
+    // **Upload file to Cloudinary**
     const promiseResult = await new Promise((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          { resource_type: "auto", folder: "Dark-Face" },
-          (error, result) => {
-            if (error) reject(error);
-            else {
-              const uploadedUrl = checkUrlType(result);
-              const { resource_type, width, height } = result;
-              const finalResult = { uploadedUrl, resource_type, width, height };
-              resolve(finalResult);
-            }
-          }
-        )
-        .end(buffer);
+      cloudinary.uploader.upload_stream(
+        { resource_type: "auto", folder: "Dark-Face" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve({
+            uploadedUrl: checkUrlType(result),
+            resource_type: result.resource_type,
+            width: result.width,
+            height: result.height,
+          });
+        }
+      ).end(buffer);
     });
 
-    // ফাইল আপলোড হলে ডাটাবেসের ফাইল কাউন্ট বাড়ানো
-    config.file += 1;
+    // **Increment file count in MongoDB**
+    const updatedConfig = await CloudinaryConfig.findByIdAndUpdate(
+      config._id,
+      { $inc: { file: 1 } },
+      { new: true }
+    );
 
-    // ফাইল কাউন্ট 50 হলে স্ট্যাটাস পরিবর্তন করা
-    if (config.file >= 50) {
-      // স্ট্যাটাস False করা
-      config.status = false;
-      await config.save();
-
-      // নতুন Active কনফিগ খুঁজে বের করা যেখানে status: false এবং file count 50 এর নিচে
-      const newConfig = await CloudinaryConfig.findOne({
-        status: false,
-        file: { $lt: 50 }, // file count 50 এর নিচে হতে হবে
-      });
-
-      if (!newConfig) {
-        throw new Error("No available space for new active configuration in the database.");
-      }
-
-      // নতুন কনফিগের স্ট্যাটাস True করা
-      newConfig.status = true;
-      newConfig.file = 0; // নতুন কনফিগের ফাইল কাউন্ট 0 সেট করা
-      await newConfig.save();
+    // **Handle file limit exceeded case**
+    if (updatedConfig.file >= 12) {
+      await CloudinaryConfig.findByIdAndUpdate(updatedConfig._id, { status: false });
+      const newConfig = await CloudinaryConfig.findOneAndUpdate(
+        { status: false, file: { $lt: 12 } },
+        { status: true, file: 0 },
+        { new: true }
+      );
+      if (!newConfig) throw new Error("Upload limit exceeded! Please add a new configuration.");
     }
 
-    // ডাটাবেস আপডেট করা
-    const conData = await config.save();
-    console.log(conData)
-
-    // রিটার্ন ডাটা
+    // Return success response
     return {
+      message: "File uploaded successfully!",
       text,
       name,
       userMongoId,
@@ -111,6 +101,6 @@ export default async function processFileUpload(req) {
       ...promiseResult,
     };
   } catch (error) {
-    throw new Error("File upload failed: " + error.message);
+    throw new Error(error.message || "Failed to upload file. Please try again.");
   }
 }
