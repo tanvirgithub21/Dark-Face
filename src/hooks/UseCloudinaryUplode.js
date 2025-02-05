@@ -39,7 +39,7 @@ export default async function processFileUpload(req) {
 
     if (!config) {
       config = await CloudinaryConfig.findOneAndUpdate(
-        { file: { $lt: 12 }, status: false },
+        { file: { $lt: 50 }, status: false },
         { status: true },
         { new: true }
       );
@@ -80,10 +80,10 @@ export default async function processFileUpload(req) {
     );
 
     // **Handle file limit exceeded case**
-    if (updatedConfig.file >= 12) {
+    if (updatedConfig.file >= 50) {
       await CloudinaryConfig.findByIdAndUpdate(updatedConfig._id, { status: false });
       const newConfig = await CloudinaryConfig.findOneAndUpdate(
-        { status: false, file: { $lt: 12 } },
+        { status: false, file: { $lt: 50 } },
         { status: true, file: 0 },
         { new: true }
       );
