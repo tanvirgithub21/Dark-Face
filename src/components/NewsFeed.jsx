@@ -134,44 +134,6 @@ const NewsFeed = () => {
     <div className="relative max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900">
       {error && <p className="text-center text-red-500">{error}</p>}
       {posts.map((post) => {
-        const girlFullNames = [
-          "Emma Johnson",
-          "Olivia Smith",
-          "Ava Williams",
-          "Sophia Brown",
-          "Isabella Jones",
-          "Mia Miller",
-          "Charlotte Davis",
-          "Amelia Wilson",
-          "Harper Anderson",
-          "Evelyn Thomas",
-          "Abigail White",
-          "Ella Harris",
-          "Scarlett Martin",
-          "Grace Thompson",
-          "Lily Garcia",
-          "Hannah Martinez",
-          "Aria Robinson",
-          "Madison Clark",
-          "Chloe Rodriguez",
-          "Aubrey Lewis",
-          "Zoey Walker",
-          "Nora Hall",
-          "Layla Allen",
-          "Riley Young",
-          "Victoria King",
-          "Stella Wright",
-          "Lucy Scott",
-          "Natalie Green",
-          "Penelope Adams",
-          "Brooklyn Nelson",
-        ];
-
-        const name =
-          post.name == (null || "")
-            ? girlFullNames[Math.floor(Math.random() * girlFullNames.length)]
-            : post.name;
-
         return (
           <div
             key={post._id}
@@ -181,14 +143,14 @@ const NewsFeed = () => {
               <div className="flex items-center space-x-3">
                 <Image
                   src={post.profileImg}
-                  alt={name}
+                  alt={post.name}
                   className="w-10 h-10 rounded-full"
                   width={40}
                   height={40}
                 />
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                    {name}
+                    {post.name}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     @ {post.username} • {formatTimeShort(post.createdAt)} ago

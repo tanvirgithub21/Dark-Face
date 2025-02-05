@@ -5,7 +5,6 @@ const ResponsiveImage = ({ src, alt }) => {
   const [fullscreenCount, setFullscreenCount] = useState(0); // Track fullscreen count
   const [isFullScreenState, setIsFullScreenState] = useState(false); // State after 2 times fullscreen
 
-  console.log({ fullscreenCount, isFullScreenState });
 
   // Open Fullscreen and track how many times fullscreen is triggered
   const openFullscreen = () => {
