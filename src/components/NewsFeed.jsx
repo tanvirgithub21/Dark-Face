@@ -162,11 +162,7 @@ const NewsFeed = () => {
               </p>
             </div>
             {post.uploadedUrl.includes("video") ? (
-              <VideoPlayer
-                key={post._id}
-                data={{ ...post, name }}
-                isActive={isActive}
-              />
+              <VideoPlayer key={post._id} data={post} isActive={isActive} />
             ) : (
               <ResponsiveImage src={post.uploadedUrl} alt="Uploaded media" />
             )}

@@ -8,9 +8,15 @@ const DatabaseList = () => {
     fetch("/api/db/all")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched Data:", data?.data); // Debugging
         if (Array.isArray(data?.data)) {
-          setData(data?.data);
+          // Data sort করা হচ্ছে: প্রথমে status: true এবং file < 50
+          const sortedData = data.data.sort((a, b) => {
+            if (a.status === b.status) {
+              return a.file - b.file; // File সংখ্যা অনুযায়ী sorting
+            }
+            return b.status - a.status; // Active status আগে দেখানো
+          });
+          setData(sortedData);
         } else {
           setData([]);
         }
@@ -23,33 +29,45 @@ const DatabaseList = () => {
   }, []);
 
   if (loading) {
-    return <div className="p-6 text-gray-900 dark:text-white">Loading...</div>;
+    return <div className="p-6 text-gray-900 dark:text-white text-sm">Loading...</div>;
   }
 
   return (
     <div className="p-6 dark:bg-gray-900 min-h-screen">
-      <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Database Records</h2>
-      <div className="flex justify-center gap-4">
-        {(Array.isArray(data) ? data : []).map((item, index) => (
-          <div
-            key={index}
-            className="border p-4 rounded-lg shadow-md bg-white dark:bg-gray-800 dark:border-gray-700"
-          >
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{item.dbName}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Collection: {item.cloudName}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Api Secret: {item.apiSecret}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-300">Api Key: {item.apiKey}</p>
-            <p className="text-sm text-gray-900 dark:text-gray-300">Files: {item.file}</p>
-            <p className="text-sm text-gray-900 dark:text-gray-300">Email: {item.email}</p>
-            <p
-              className={`text-sm font-bold mt-2 ${
-                item.status ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Database Records</h2>
+      <div className="flex justify-center gap-4 flex-wrap">
+        {data.map((item, index) => {
+          const isHighFileCount = item.file >= 50;
+
+          return (
+            <div
+              key={index}
+              className={`border p-4 rounded-lg shadow-md dark:border-gray-700 transition duration-300 ${
+                isHighFileCount
+                  ? "bg-red-100 dark:bg-red-900 border-red-400"
+                  : "bg-white dark:bg-gray-800"
               }`}
             >
-              Status: {item.status ? "Active" : "Inactive"}
-            </p>
-          </div>
-        ))}
+              <h3 className={`text-base font-semibold ${isHighFileCount ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-white"}`}>
+                {item.dbName}
+              </h3>
+              <p className="text-xs">Collection: {item.cloudName}</p>
+              <p className="text-xs">Api Secret: {item.apiSecret}</p>
+              <p className="text-xs">Api Key: {item.apiKey}</p>
+              <p className={`text-xs font-semibold ${isHighFileCount ? "text-red-700 dark:text-red-300" : "text-gray-900 dark:text-gray-300"}`}>
+                Files: {item.file}
+              </p>
+              <p className="text-xs">Email: {item.email}</p>
+              <p
+                className={`text-xs font-bold mt-2 ${
+                  item.status ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                }`}
+              >
+                Status: {item.status ? "✅ Active" : "❌ Inactive"}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
