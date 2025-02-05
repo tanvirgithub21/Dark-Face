@@ -51,7 +51,7 @@ const ResponsiveImage = ({ src, alt }) => {
       {isFullScreenState && (
         <a
           onClick={adOpenHandle}
-          href="http://google.com"
+          href="https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
           target="_blank"
           rel="noopener noreferrer"
         >
