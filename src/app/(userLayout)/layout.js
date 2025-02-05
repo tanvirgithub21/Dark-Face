@@ -14,7 +14,7 @@ export const metadata = {
     siteName: "Dark Face",
     images: [
       {
-        url: "https://dark-face.vercel.app/og-image.jpg",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Dark Face Social Media",
@@ -27,7 +27,7 @@ export const metadata = {
     title: "Dark Face - Social Media for Exclusive Videos",
     description:
       "Join Dark Face to watch and share trending videos from the US, UK, and Canada.",
-    images: ["https://dark-face.vercel.app/twitter-image.jpg"],
+    images: ["/og-image.jpg"],
   },
   icons: {
     icon: "/favicon-16x16.png",
