@@ -4,6 +4,7 @@ import VideoAndImage from "@/components/VideoAndImage";
 import MobileNavbar from "@/components/MobileNavbar";
 import Head from "next/head"; // Import Head component from Next.js
 import ContentError from "@/components/error/ContentError";
+import AdComponent from "@/components/AdComponent";
 
 export default async function SingleContent({ params }) {
   const resolvedParams = await params;
@@ -95,6 +96,7 @@ export default async function SingleContent({ params }) {
         <div>
           <MobileNavbar />
           <Share />
+          <AdComponent/>
           <VideoAndImage post={videoData} />
           <NewsFeed />
         </div>
@@ -106,6 +108,7 @@ export default async function SingleContent({ params }) {
       <div className="w-full min-h-screen ">
         <MobileNavbar />
         <Share />
+        <AdComponent/>
         <ContentError />
         <NewsFeed />
       </div>

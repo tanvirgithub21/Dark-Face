@@ -8,10 +8,29 @@ import { BiSolidDonateHeart } from "react-icons/bi";
 import { FaRegComment } from "react-icons/fa6";
 import ResponsiveImage from "./ResponsiveImage";
 import SkeletonContent from "./loading/SkeletonContent";
+import { FaClipboard } from "react-icons/fa";
 
 const NewsFeed = () => {
   const [isActive, setIsActive] = useState(false);
   const [countdown, setCountdown] = useState(0);
+
+  const [copyStatus, setCopyStatus] = useState("Copy"); // Clipboard copy status
+
+  const handleCopyClick = async (id) => {
+    const textToCopy =
+      `https://dark-face.vercel.app/content/${id}`; // Example URL to copy
+
+    try {
+      await navigator.clipboard.writeText(textToCopy);
+      setCopyStatus("Copied!");
+
+      // Reset "Copied!" status after 2 seconds
+      setTimeout(() => setCopyStatus("Copy"), 2000);
+    } catch (err) {
+      setCopyStatus("Failed to copy!");
+      console.error("Copy failed: ", err);
+    }
+  };
 
   // Function to set a random time interval (5 to 10 minutes)
   const setRandomTimer = () => {
@@ -174,15 +193,19 @@ const NewsFeed = () => {
               <div className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
                 <FaRegComment className="mr-1 text-base" /> Comment
               </div>
-              <div className="w-[32%] flex justify-center items-start h-8 cursor-pointer rounded-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
-                <a
-                  className="flex justify-center items-center my-auto text-sm "
-                  href="https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <BiSolidDonateHeart className="mr-1 text-base" /> Support
-                </a>
+              <div
+                onClick={() => handleCopyClick(post._id)}
+                className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out "
+              >
+                {copyStatus === "Copied!" ? (
+                  <p className="flex justify-center items-start">
+                    Copied! <FaClipboard className="ml-1 text-base" />
+                  </p>
+                ) : (
+                  <p className="flex justify-center items-start">
+                    Share <FaClipboard className="ml-1 text-base" />
+                  </p>
+                )}
               </div>
             </div>
           </div>

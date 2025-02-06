@@ -52,3 +52,13 @@ body {
   alignment-baseline: middle;
 }
 
+/* আপনার গ্লোবাল CSS বা কম্পোনেন্টের CSS-এ যোগ করুন */
+.ad-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 9999;
+  background-color: #fff; /* ঐচ্ছিক: ব্যাকগ্রাউন্ড সাদা হবে */
+  text-align: center; /* ঐচ্ছিক: অ্যাডের কনটেন্ট সেন্টার করা */
+}
