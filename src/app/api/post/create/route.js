@@ -97,6 +97,8 @@ export const POST = async (req) => {
 
 
   try {
+    const uploadData = await processFileUpload(req);
+
     const {
       text,
       name,
@@ -107,7 +109,10 @@ export const POST = async (req) => {
       resource_type,
       width,
       height,
-    } = await processFileUpload(req);
+      public_id,
+    } = uploadData
+
+    console.log({uploadData})
 
     await connect();
 
@@ -131,6 +136,7 @@ export const POST = async (req) => {
       resourceType: resource_type,
       height,
       width,
+      public_id,
     });
     await newPost.save();
     return new Response(JSON.stringify(newPost), {

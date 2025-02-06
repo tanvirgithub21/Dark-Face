@@ -43,7 +43,10 @@ export default async function processFileUpload(req) {
         { status: true },
         { new: true }
       );
-      if (!config) throw new Error("Upload limit exceeded! Please add a new configuration.");
+      if (!config)
+        throw new Error(
+          "Upload limit exceeded! Please add a new configuration."
+        );
     }
 
     // **Set Cloudinary config from the database**
@@ -58,18 +61,22 @@ export default async function processFileUpload(req) {
 
     // **Upload file to Cloudinary**
     const promiseResult = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        { resource_type: "auto", folder: "Dark-Face" },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve({
-            uploadedUrl: checkUrlType(result),
-            resource_type: result.resource_type,
-            width: result.width,
-            height: result.height,
-          });
-        }
-      ).end(buffer);
+      cloudinary.uploader
+        .upload_stream(
+          { resource_type: "auto", folder: "Dark-Face" },
+          (error, result) => {
+            if (error) reject(error);
+            else
+              resolve({
+                uploadedUrl: checkUrlType(result),
+                resource_type: result.resource_type,
+                width: result.width,
+                height: result.height,
+                public_id: result.public_id,
+              });
+          }
+        )
+        .end(buffer);
     });
 
     // **Increment file count in MongoDB**
@@ -81,13 +88,18 @@ export default async function processFileUpload(req) {
 
     // **Handle file limit exceeded case**
     if (updatedConfig.file >= 50) {
-      await CloudinaryConfig.findByIdAndUpdate(updatedConfig._id, { status: false });
+      await CloudinaryConfig.findByIdAndUpdate(updatedConfig._id, {
+        status: false,
+      });
       const newConfig = await CloudinaryConfig.findOneAndUpdate(
         { status: false, file: { $lt: 50 } },
         { status: true, file: 0 },
         { new: true }
       );
-      if (!newConfig) throw new Error("Upload limit exceeded! Please add a new configuration.");
+      if (!newConfig)
+        throw new Error(
+          "Upload limit exceeded! Please add a new configuration."
+        );
     }
 
     // Return success response
@@ -101,6 +113,8 @@ export default async function processFileUpload(req) {
       ...promiseResult,
     };
   } catch (error) {
-    throw new Error(error.message || "Failed to upload file. Please try again.");
+    throw new Error(
+      error.message || "Failed to upload file. Please try again."
+    );
   }
 }

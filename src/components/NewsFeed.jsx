@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import VideoPlayer from "./VideoPlayer";
 import Image from "next/image";
 import { BiLike } from "react-icons/bi";
-import { BiSolidDonateHeart } from "react-icons/bi";
 import { FaRegComment } from "react-icons/fa6";
 import ResponsiveImage from "./ResponsiveImage";
 import SkeletonContent from "./loading/SkeletonContent";
@@ -13,18 +12,21 @@ import { FaClipboard } from "react-icons/fa";
 const NewsFeed = () => {
   const [isActive, setIsActive] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [copyStatus, setCopyStatus] = useState("Copy");
+  const [posts, setPosts] = useState([]);
+  const [excludeIds, setExcludeIds] = useState(new Set());
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [noDataInServer, setNoDataInServer] = useState(false);
 
-  const [copyStatus, setCopyStatus] = useState("Copy"); // Clipboard copy status
+  // 📌 📌 `isActive` কে `useMemo` দিয়ে অপ্টিমাইজ করা
+  const isActiveMemo = useMemo(() => countdown === 0, [countdown]);
 
+  // 📌 📌 `handleCopyClick` অপ্টিমাইজ করা
   const handleCopyClick = async (id) => {
-    const textToCopy =
-      `https://dark-face.vercel.app/content/${id}`; // Example URL to copy
-
     try {
-      await navigator.clipboard.writeText(textToCopy);
+      await navigator.clipboard.writeText(`https://dark-face.vercel.app/content/${id}`);
       setCopyStatus("Copied!");
-
-      // Reset "Copied!" status after 2 seconds
       setTimeout(() => setCopyStatus("Copy"), 2000);
     } catch (err) {
       setCopyStatus("Failed to copy!");
@@ -32,46 +34,24 @@ const NewsFeed = () => {
     }
   };
 
-  // Function to set a random time interval (5 to 10 minutes)
-  const setRandomTimer = () => {
-    const randomTime = Math.floor(Math.random() * (10 - 5 + 1) + 5) * 60; // Convert minutes to seconds
+  // 📌 📌 র‍্যান্ডম টাইমার সেট করা
+  useEffect(() => {
+    const randomTime = Math.floor(Math.random() * (10 - 5 + 1) + 5) * 60; // 5-10 মিনিট
     setCountdown(randomTime);
 
-    const timer = setTimeout(() => {
-      setIsActive(true);
-    }, randomTime * 1000); // Convert seconds to milliseconds
-
+    const timer = setTimeout(() => setIsActive(true), randomTime * 1000);
     return () => clearTimeout(timer);
-  };
+  }, [isActive]);
 
-  // Run effect once on mount and whenever isActive becomes false
+  // 📌 📌 Countdown Timer অপ্টিমাইজ করা
   useEffect(() => {
-    setRandomTimer();
-  }, [isActive]); // Re-run when isActive changes to false
-
-  // Countdown Timer
-  useEffect(() => {
-    if (countdown > 0) {
-      const interval = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(interval);
-    }
+    if (countdown <= 0) return;
+    const interval = setInterval(() => setCountdown((prev) => prev - 1), 1000);
+    return () => clearInterval(interval);
   }, [countdown]);
 
-  // Function to handle click and open Google in a new tab
-  const handleClick = () => {
-    if (!isActive) return;
-    setIsActive(false);
-  };
-
-  const [posts, setPosts] = useState([]);
-  const [excludeIds, setExcludeIds] = useState(new Set());
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [noDataInServer, setNoDataInServer] = useState(false);
-
-  const fetchPosts = async () => {
+  // 📌 📌 ফিড ডেটা লোড করার অপ্টিমাইজ করা ফাংশন
+  const fetchPosts = useCallback(async () => {
     if (loading || noDataInServer) return;
 
     setLoading(true);
@@ -79,64 +59,43 @@ const NewsFeed = () => {
 
     try {
       console.log("Fetching posts...");
-      const res = await fetch(
-        `/api/post/all?excludeIds=${JSON.stringify([...excludeIds])}`
-      );
+      const res = await fetch(`/api/post/all?excludeIds=${JSON.stringify([...excludeIds])}`);
 
-      if (!res.ok) {
-        setError("Failed to load posts, please try again later.");
-        setLoading(false);
+      if (!res.ok) throw new Error("Failed to load posts");
+
+      const data = await res.json();
+      if (!data?.posts?.length) {
+        setNoDataInServer(true);
         return;
       }
 
-      const data = await res.json();
-
-      if (data?.posts?.length > 0) {
-        const newPosts = data.posts.filter((post) => !excludeIds.has(post._id));
-
-        if (newPosts.length > 0) {
-          setPosts((prevPosts) => {
-            const updatedPosts = [...prevPosts, ...newPosts];
-            return Array.from(
-              new Map(updatedPosts.map((post) => [post._id, post])).values()
-            );
-          });
-
-          setExcludeIds(
-            (prevIds) =>
-              new Set([...prevIds, ...newPosts.map((post) => post._id)])
-          );
-        }
-      } else {
-        setNoDataInServer(true);
-      }
+      setPosts((prev) => [...new Map([...prev, ...data.posts].map((p) => [p._id, p])).values()]);
+      setExcludeIds((prev) => new Set([...prev, ...data.posts.map((p) => p._id)]));
     } catch (error) {
       setError("An error occurred while fetching posts.");
+    } finally {
+      setLoading(false);
     }
+  }, [loading, noDataInServer, excludeIds]);
 
-    setLoading(false);
-  };
-
+  // 📌 📌 প্রথমবার পোস্ট লোড করা
   useEffect(() => {
     fetchPosts();
   }, []);
 
+  // 📌 📌 স্ক্রলিং হ্যান্ডলার অপ্টিমাইজ করা
   useEffect(() => {
     const handleScroll = () => {
-      if (
-        window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 100 &&
-        !loading &&
-        !noDataInServer
-      ) {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !loading && !noDataInServer) {
         fetchPosts();
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [loading, noDataInServer]);
+  }, [fetchPosts, loading, noDataInServer]);
 
+  // 📌 📌 সময় ফরম্যাট করা
   const formatTimeShort = (date) => {
     const now = new Date();
     const diffInSeconds = Math.floor((now - new Date(date)) / 1000);
@@ -144,92 +103,48 @@ const NewsFeed = () => {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (days > 0) return `${days}d`;
-    if (hours > 0) return `${hours}h`;
-    if (minutes > 0) return `${minutes}m`;
-    return `${diffInSeconds}s`;
+    return days > 0 ? `${days}d` : hours > 0 ? `${hours}h` : minutes > 0 ? `${minutes}m` : `${diffInSeconds}s`;
   };
 
   return (
     <div className="relative max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900">
       {error && <p className="text-center text-red-500">{error}</p>}
-      {posts.map((post) => {
-        return (
-          <div
-            key={post._id}
-            className="bg-white dark:bg-gray-800 rounded-sm shadow-md"
-          >
-            <div className="px-2 pt-2">
-              <div className="flex items-center space-x-3">
-                <Image
-                  src={post.profileImg}
-                  alt={post.name}
-                  className="w-10 h-10 rounded-full"
-                  width={40}
-                  height={40}
-                />
-                <div>
-                  <p className="font-semibold text-gray-900 dark:text-white text-sm">
-                    {post.name}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    @ {post.username} • {formatTimeShort(post.createdAt)} ago
-                  </p>
-                </div>
+      {posts.map((post) => (
+        <div key={post._id} className="bg-white dark:bg-gray-800 rounded-sm shadow-md">
+          <div className="px-2 pt-2">
+            <div className="flex items-center space-x-3">
+              <Image src={post.profileImg} alt={post.name} className="w-10 h-10 rounded-full" width={40} height={40} />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white text-sm">{post.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">@ {post.username} • {formatTimeShort(post.createdAt)} ago</p>
               </div>
-              <p className="line-clamp-2 overflow-hidden text-ellipsis mt-2 text-sm text-gray-700 dark:text-gray-300">
-                {post.text}
-              </p>
             </div>
-            {post.uploadedUrl.includes("video") ? (
-              <VideoPlayer key={post._id} data={post} isActive={isActive} />
-            ) : (
-              <ResponsiveImage src={post.uploadedUrl} alt="Uploaded media" />
-            )}
-            <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 text-sm px-3 py-1">
-              <div className="w-[32%] h-8 cursor-pointer flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
-                <BiLike className="mr-1 text-base" /> Like
-              </div>
-              <div className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out ">
-                <FaRegComment className="mr-1 text-base" /> Comment
-              </div>
-              <div
-                onClick={() => handleCopyClick(post._id)}
-                className="w-[32%] h-8 cursor-not-allowed flex justify-center items-center rounded-sm text-sm space-x-1 hover:bg-gray-700 transition duration-300 ease-in-out "
-              >
-                {copyStatus === "Copied!" ? (
-                  <p className="flex justify-center items-start">
-                    Copied! <FaClipboard className="ml-1 text-base" />
-                  </p>
-                ) : (
-                  <p className="flex justify-center items-start">
-                    Share <FaClipboard className="ml-1 text-base" />
-                  </p>
-                )}
-              </div>
+            <p className="line-clamp-2 overflow-hidden text-ellipsis mt-2 text-sm text-gray-700 dark:text-gray-300">
+              {post.text}
+            </p>
+          </div>
+
+          {post.uploadedUrl.includes("video") ? (
+            <VideoPlayer key={post._id} data={post} isActive={isActiveMemo} />
+          ) : (
+            <ResponsiveImage src={post.uploadedUrl} alt="Uploaded media" />
+          )}
+
+          <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 text-sm px-3 py-1">
+            <div className="w-[32%] h-8 cursor-pointer flex justify-center items-center rounded-sm text-sm hover:bg-gray-700">
+              <BiLike className="mr-1 text-base" /> Like
+            </div>
+            <div className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm hover:bg-gray-700">
+              <FaRegComment className="mr-1 text-base" /> Comment
+            </div>
+            <div onClick={() => handleCopyClick(post._id)} className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm hover:bg-gray-700">
+              {copyStatus === "Copied!" ? <p className="flex justify-center items-center">Copied! <FaClipboard className="ml-1 text-base" /></p> : <p className="flex justify-center items-center">Share <FaClipboard className="ml-1 text-base" /></p>}
             </div>
           </div>
-        );
-      })}
-
-      {isActive && (
-        <a
-          onClick={handleClick}
-          href="https://www.profitablecpmrate.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <div className="w-full h-full absolute top-0 left-0 bg-[#00000001]"></div>
-        </a>
-      )}
-
-      {loading && (
-        <div className="w-full">
-          {[...Array(5)].map((_, index) => (
-            <SkeletonContent key={index} />
-          ))}
         </div>
-      )}
+      ))}
+
+      {loading && [...Array(5)].map((_, index) => <SkeletonContent key={index} />)}
     </div>
   );
 };

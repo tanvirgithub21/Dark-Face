@@ -7,8 +7,8 @@ export default function AddPost() {
   const [title, setTitle] = useState("");
   const [files, setFiles] = useState([]);
   const [isClient, setIsClient] = useState(false);
-
   const [allFilePostLoading, setAllFilePostLoading] = useState(false);
+  const [progress, setProgress] = useState(0); // Progress state
 
   const { user, isSignedIn, isLoaded } = useUser();
   const { uploadFile, loading, error } = useUpload();
@@ -24,6 +24,7 @@ export default function AddPost() {
   const handleUpload = async () => {
     console.log({ title, files });
     setAllFilePostLoading(true);
+    setProgress(0);
 
     if (!user) {
       console.error("User not authenticated");
@@ -32,10 +33,23 @@ export default function AddPost() {
     }
 
     try {
-      const uploadPromises = files.map((file) => uploadFile(file, title, user));
-      const results = await Promise.all(uploadPromises);
+      let uploadedCount = 0; // Track uploaded files count
 
-      console.log("All files uploaded successfully:", results);
+      for (const file of files) {
+        await uploadFile(file, title, user);
+        uploadedCount++;
+
+        // Calculate progress
+        const newProgress = Math.round((uploadedCount / files.length) * 100);
+        setProgress(newProgress); // Update progress
+
+        console.log(`Uploaded: ${file.name} (${newProgress}%)`);
+
+        // Wait for 5 seconds before uploading next file
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
+      console.log("All files uploaded successfully");
       setAllFilePostLoading(false);
     } catch (error) {
       console.error("Error uploading files:", error);
@@ -90,9 +104,19 @@ export default function AddPost() {
           ))}
       </div>
 
+      {/* Progress Bar */}
+      <div className="w-full bg-gray-300 rounded-full h-4 mb-3">
+        <div
+          className="bg-green-500 h-4 rounded-full transition-all"
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
+      <p className="text-center text-sm text-gray-600">{progress}% Uploaded</p>
+
       <button
         onClick={handleUpload}
         className="w-full bg-green-500 text-white px-4 py-2 rounded"
+        disabled={allFilePostLoading}
       >
         {allFilePostLoading ? "Uploading..." : "Upload"}
       </button>

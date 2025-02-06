@@ -44,7 +44,6 @@ export default function RootLayout({ children }) {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         <body>
-          <AdComponent/>
           <div className="max-w-screen-md mx-auto">{children}</div>
         </body>
       </html>
