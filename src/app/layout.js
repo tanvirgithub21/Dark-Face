@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
           property="og:description"
           content="Dark Face is a social media platform featuring trending videos and photos from Europe and America."
         />
-        <meta property="og:image" content="/darkface-preview.png" />
+        <meta property="og:image" content="/og-image.jpg" />
         <meta property="og:url" content="https://dark-face.vercel.app/" />
         <link rel="shortcut icon" href="/favicon-16x16.png" type="image/x-icon" />
         <link rel="icon" href="/favicon-16x16.png" type="image/x-icon" />

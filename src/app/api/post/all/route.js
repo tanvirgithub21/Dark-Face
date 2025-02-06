@@ -22,7 +22,7 @@ export async function GET(req) {
         },
       }, // Already fetched posts exclude
       { $sort: { createdAt: -1 } }, // Notun post priority pabe
-      { $sample: { size: 3 } }, // Randomly 10 post select
+      { $sample: { size: 5 } }, // Randomly 10 post select
     ]);
 
     return NextResponse.json({ posts }, { status: 200 });

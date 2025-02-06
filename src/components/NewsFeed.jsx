@@ -7,6 +7,7 @@ import { BiLike } from "react-icons/bi";
 import { BiSolidDonateHeart } from "react-icons/bi";
 import { FaRegComment } from "react-icons/fa6";
 import ResponsiveImage from "./ResponsiveImage";
+import SkeletonContent from "./loading/SkeletonContent";
 
 const NewsFeed = () => {
   const [isActive, setIsActive] = useState(false);
@@ -200,8 +201,10 @@ const NewsFeed = () => {
       )}
 
       {loading && (
-        <div className="flex justify-center items-center">
-          <div className="w-8 h-8 border-4 border-t-transparent border-blue-500 rounded-full animate-spin"></div>
+        <div className="w-full">
+          {[...Array(5)].map((_, index) => (
+            <SkeletonContent key={index} />
+          ))}
         </div>
       )}
     </div>

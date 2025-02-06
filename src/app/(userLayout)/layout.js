@@ -1,4 +1,5 @@
 import { ClerkProvider } from "@clerk/nextjs";
+import Head from "next/head";
 
 export const metadata = {
   title: "Dark Face - Social Media for Exclusive Videos",
@@ -38,6 +39,9 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en">
+        <Head>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
         <body>
           <div className="max-w-screen-md mx-auto">{children}</div>
         </body>
