@@ -86,7 +86,7 @@ const NewsFeed = () => {
   // 📌 📌 স্ক্রলিং হ্যান্ডলার অপ্টিমাইজ করা
   useEffect(() => {
     const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !loading && !noDataInServer) {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 250 && !loading && !noDataInServer) {
         fetchPosts();
       }
     };
