@@ -2,9 +2,8 @@ import NewsFeed from "@/components/NewsFeed";
 import Share from "@/components/Share";
 import VideoAndImage from "@/components/VideoAndImage";
 import MobileNavbar from "@/components/MobileNavbar";
-import Head from "next/head"; // Import Head component from Next.js
+import Head from "next/head";
 import ContentError from "@/components/error/ContentError";
-import AdComponent from "@/components/AdComponent";
 
 export default async function SingleContent({ params }) {
   const resolvedParams = await params;
@@ -35,8 +34,10 @@ export default async function SingleContent({ params }) {
       _id: videoData._id,
       title: videoData.text,
       uploadedUrl: videoData.uploadedUrl,
+      tumb: videoData.tumb,
       width: videoData.width,
       height: videoData.height,
+      resourceType: videoData.resourceType, // ✅ Video or Image
       user: {
         name: videoData.name,
         username: videoData.username,
@@ -51,37 +52,55 @@ export default async function SingleContent({ params }) {
         updatedAt: new Date(videoData.updatedAt).toLocaleString(),
       },
       description:
-        "Watch this amazing video showcasing the power of confidence and beauty in American women.",
+        "Watch this amazing content showcasing the power of confidence and beauty in American women.",
       keywords: "American women, beauty, confidence, chic, empowerment",
       author: "Dark Face Team",
     };
 
-    // Social Media Preview Meta Tags
+    // **resourceType অনুযায়ী og:type সেট করুন**
+    const ogType = metadata.resourceType === "video" ? "video" : "image";
+
+    // **Social Media Preview Meta Tags**
     const socialMediaMetaTags = (
       <Head>
         <title>{metadata.title} | Dark Face</title>
         <meta name="description" content={metadata.description} />
         <meta name="keywords" content={metadata.keywords} />
         <meta name="author" content={metadata.author} />
-        <meta property="og:type" content="video" />
+        <meta property="og:type" content={ogType} />
         <meta property="og:title" content={metadata.title} />
         <meta property="og:description" content={metadata.description} />
-        <meta property="og:image" content={metadata.user.profileImg} />
-        <meta property="og:video" content={metadata.uploadedUrl} />
-        <meta property="og:video:type" content="video/mp4" />
-        <meta property="og:video:width" content={metadata.width} />
-        <meta property="og:video:height" content={metadata.height} />
+        <meta property="og:image" content={metadata.tumb} />
+
+        {ogType === "video" && (
+          <>
+            <meta property="og:video" content={metadata.uploadedUrl} />
+            <meta property="og:video:type" content="video/mp4" />
+            <meta property="og:video:width" content={metadata.width} />
+            <meta property="og:video:height" content={metadata.height} />
+          </>
+        )}
+
         <meta
           property="og:url"
           content={`${process.env.URL}/content/${metadata._id}`}
         />
-        <meta name="twitter:card" content="player" />
+        <meta
+          name="twitter:card"
+          content={ogType === "video" ? "player" : "summary_large_image"}
+        />
         <meta name="twitter:title" content={metadata.title} />
         <meta name="twitter:description" content={metadata.description} />
-        <meta name="twitter:image" content={metadata.user.profileImg} />
-        <meta name="twitter:player" content={metadata.uploadedUrl} />
-        <meta name="twitter:player:width" content={metadata.width} />
-        <meta name="twitter:player:height" content={metadata.height} />
+        <meta name="twitter:image" content={metadata.tumb} />
+
+        {ogType === "video" && (
+          <>
+            <meta name="twitter:player" content={metadata.uploadedUrl} />
+            <meta name="twitter:player:width" content={metadata.width} />
+            <meta name="twitter:player:height" content={metadata.height} />
+          </>
+        )}
+
         <link
           rel="canonical"
           href={`${process.env.URL}/content/${metadata._id}`}
@@ -96,7 +115,6 @@ export default async function SingleContent({ params }) {
         <div>
           <MobileNavbar />
           <Share />
-          <AdComponent/>
           <VideoAndImage post={videoData} />
           <NewsFeed />
         </div>
@@ -108,7 +126,6 @@ export default async function SingleContent({ params }) {
       <div className="w-full min-h-screen ">
         <MobileNavbar />
         <Share />
-        <AdComponent/>
         <ContentError />
         <NewsFeed />
       </div>

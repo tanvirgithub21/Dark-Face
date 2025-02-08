@@ -20,6 +20,18 @@ const checkUrlType = (data) => {
     : null;
 };
 
+// Check file type
+const createTumb = (data) => {
+  if (data.resource_type == "image") {
+    return data.url;
+  } else if (data.resource_type == "video") {
+    const videoTumb = data.url
+      .replace("/upload/", "/upload/so_2/")
+      .replace(".mp4", ".jpg");
+    return videoTumb;
+  }
+};
+
 // ✅ Function to handle file upload
 export default async function processFileUpload(req) {
   try {
@@ -55,8 +67,8 @@ export default async function processFileUpload(req) {
       api_key: config.apiKey,
       api_secret: config.apiSecret,
     });
-
     // **Read file into a buffer**
+
     const buffer = Buffer.from(await file.arrayBuffer());
 
     // **Upload file to Cloudinary**
@@ -73,6 +85,7 @@ export default async function processFileUpload(req) {
                 width: result.width,
                 height: result.height,
                 public_id: result.public_id,
+                tumb: createTumb(result),
               });
           }
         )

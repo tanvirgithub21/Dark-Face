@@ -110,6 +110,7 @@ export const POST = async (req) => {
       width,
       height,
       public_id,
+      tumb
     } = uploadData
 
     console.log({uploadData})
@@ -137,6 +138,7 @@ export const POST = async (req) => {
       height,
       width,
       public_id,
+      tumb
     });
     await newPost.save();
     return new Response(JSON.stringify(newPost), {
