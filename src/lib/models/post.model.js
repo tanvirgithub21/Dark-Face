@@ -38,6 +38,10 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    adult: {
+      type: Boolean,
+      default: true,
+    },
     profileImg: {
       type: String,
       required: true,
