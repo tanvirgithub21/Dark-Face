@@ -10,7 +10,7 @@ import SkeletonContent from "./loading/SkeletonContent";
 import { FaClipboard } from "react-icons/fa";
 
 const NewsFeed = () => {
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [countdown, setCountdown] = useState(0);
   const [copyStatus, setCopyStatus] = useState("Copy");
   const [posts, setPosts] = useState([]);
@@ -25,7 +25,9 @@ const NewsFeed = () => {
   // 📌 📌 `handleCopyClick` অপ্টিমাইজ করা
   const handleCopyClick = async (id) => {
     try {
-      await navigator.clipboard.writeText(`https://dark-face.vercel.app/content/${id}`);
+      await navigator.clipboard.writeText(
+        `https://dark-face.vercel.app/content/${id}`
+      );
       setCopyStatus("Copied!");
       setTimeout(() => setCopyStatus("Copy"), 2000);
     } catch (err) {
@@ -43,6 +45,8 @@ const NewsFeed = () => {
     return () => clearTimeout(timer);
   }, [isActive]);
 
+  const setAd = () => setIsActive(false)
+
   // 📌 📌 Countdown Timer অপ্টিমাইজ করা
   useEffect(() => {
     if (countdown <= 0) return;
@@ -59,7 +63,9 @@ const NewsFeed = () => {
 
     try {
       console.log("Fetching posts...");
-      const res = await fetch(`/api/post/all?excludeIds=${JSON.stringify([...excludeIds])}`);
+      const res = await fetch(
+        `/api/post/all?excludeIds=${JSON.stringify([...excludeIds])}`
+      );
 
       if (!res.ok) throw new Error("Failed to load posts");
 
@@ -69,8 +75,12 @@ const NewsFeed = () => {
         return;
       }
 
-      setPosts((prev) => [...new Map([...prev, ...data.posts].map((p) => [p._id, p])).values()]);
-      setExcludeIds((prev) => new Set([...prev, ...data.posts.map((p) => p._id)]));
+      setPosts((prev) => [
+        ...new Map([...prev, ...data.posts].map((p) => [p._id, p])).values(),
+      ]);
+      setExcludeIds(
+        (prev) => new Set([...prev, ...data.posts.map((p) => p._id)])
+      );
     } catch (error) {
       setError("An error occurred while fetching posts.");
     } finally {
@@ -86,7 +96,12 @@ const NewsFeed = () => {
   // 📌 📌 স্ক্রলিং হ্যান্ডলার অপ্টিমাইজ করা
   useEffect(() => {
     const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 250 && !loading && !noDataInServer) {
+      if (
+        window.innerHeight + window.scrollY >=
+          document.body.offsetHeight - 250 &&
+        !loading &&
+        !noDataInServer
+      ) {
         fetchPosts();
       }
     };
@@ -103,20 +118,50 @@ const NewsFeed = () => {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    return days > 0 ? `${days}d` : hours > 0 ? `${hours}h` : minutes > 0 ? `${minutes}m` : `${diffInSeconds}s`;
+    return days > 0
+      ? `${days}d`
+      : hours > 0
+      ? `${hours}h`
+      : minutes > 0
+      ? `${minutes}m`
+      : `${diffInSeconds}s`;
   };
 
   return (
     <div className="relative max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900">
       {error && <p className="text-center text-red-500">{error}</p>}
+      {isActive && (
+        <a
+        onClick={setAd}
+          href="https://www.effectiveratecpm.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {" "}
+          <div className="fixed z-[9999] top-0 left-0 w-screen h-screen bg-[#00000003]"></div>
+        </a>
+      )}
       {posts.map((post) => (
-        <div key={post._id} className="bg-white dark:bg-gray-800 rounded-sm shadow-md">
+        <div
+          key={post._id}
+          className="bg-white dark:bg-gray-800 rounded-sm shadow-md"
+        >
           <div className="px-2 pt-2">
             <div className="flex items-center space-x-3">
-              <Image src={post.profileImg} alt={post.name} className="w-10 h-10 rounded-full" width={40} height={40} />
+              <Image
+                src={post.profileImg}
+                alt={post.name}
+                className="w-10 h-10 rounded-full"
+                width={40}
+                height={40}
+              />
               <div>
-                <p className="font-semibold text-gray-900 dark:text-white text-sm">{post.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">@ {post.username} • {formatTimeShort(post.createdAt)} ago</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-sm">
+                  {post.name}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  @ {post.username} • {formatTimeShort(post.createdAt)} ago
+                </p>
               </div>
             </div>
             <p className="line-clamp-2 overflow-hidden text-ellipsis mt-2 text-sm text-gray-700 dark:text-gray-300">
@@ -137,14 +182,26 @@ const NewsFeed = () => {
             <div className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm hover:bg-gray-700">
               <FaRegComment className="mr-1 text-base" /> Comment
             </div>
-            <div onClick={() => handleCopyClick(post._id)} className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm hover:bg-gray-700">
-              {copyStatus === "Copied!" ? <p className="flex justify-center items-center">Copied! <FaClipboard className="ml-1 text-base" /></p> : <p className="flex justify-center items-center">Share <FaClipboard className="ml-1 text-base" /></p>}
+            <div
+              onClick={() => handleCopyClick(post._id)}
+              className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm hover:bg-gray-700"
+            >
+              {copyStatus === "Copied!" ? (
+                <p className="flex justify-center items-center">
+                  Copied! <FaClipboard className="ml-1 text-base" />
+                </p>
+              ) : (
+                <p className="flex justify-center items-center">
+                  Share <FaClipboard className="ml-1 text-base" />
+                </p>
+              )}
             </div>
           </div>
         </div>
       ))}
 
-      {loading && [...Array(5)].map((_, index) => <SkeletonContent key={index} />)}
+      {loading &&
+        [...Array(5)].map((_, index) => <SkeletonContent key={index} />)}
     </div>
   );
 };
