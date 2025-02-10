@@ -41,7 +41,7 @@ export default async function SingleContent({ params }) {
       user: {
         name: videoData.name,
         username: videoData.username,
-        profileImg: videoData.profileImg,
+        profileImg: videoData.tumb,
       },
       engagement: {
         likes: videoData.likes.length,
