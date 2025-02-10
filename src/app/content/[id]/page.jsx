@@ -30,18 +30,23 @@ export default async function SingleContent({ params }) {
     const videoData = await res.json();
     console.log(videoData);
 
+    // ✅ Ensure Thumbnail uses HTTPS
+    const secureThumbnail = videoData.tumb.startsWith("http:")
+      ? videoData.tumb.replace("http:", "https:")
+      : videoData.tumb;
+
     const metadata = {
       _id: videoData._id,
       title: videoData.text,
       uploadedUrl: videoData.uploadedUrl,
-      tumb: videoData.tumb,
+      tumb: secureThumbnail, // ✅ Correct thumbnail URL
       width: videoData.width,
       height: videoData.height,
-      resourceType: videoData.resourceType, // ✅ Video or Image
+      resourceType: videoData.resourceType,
       user: {
         name: videoData.name,
         username: videoData.username,
-        profileImg: videoData.tumb,
+        profileImg: videoData.profileImg,
       },
       engagement: {
         likes: videoData.likes.length,
@@ -57,22 +62,27 @@ export default async function SingleContent({ params }) {
       author: "Dark Face Team",
     };
 
-    // **resourceType অনুযায়ী og:type সেট করুন**
-    const ogType = metadata.resourceType === "video" ? "video" : "image";
+    // ✅ Set correct Open Graph type
+    const ogType = metadata.resourceType === "video" ? "video.other" : "image";
 
-    // **Social Media Preview Meta Tags**
+    // ✅ Open Graph & Twitter Meta Tags
     const socialMediaMetaTags = (
       <Head>
         <title>{metadata.title} | Dark Face</title>
         <meta name="description" content={metadata.description} />
         <meta name="keywords" content={metadata.keywords} />
         <meta name="author" content={metadata.author} />
+
         <meta property="og:type" content={ogType} />
         <meta property="og:title" content={metadata.title} />
         <meta property="og:description" content={metadata.description} />
         <meta property="og:image" content={metadata.tumb} />
+        <meta property="og:image:secure_url" content={metadata.tumb} />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="720" />
+        <meta property="og:image:height" content="1280" />
 
-        {ogType === "video" && (
+        {ogType === "video.other" && (
           <>
             <meta property="og:video" content={metadata.uploadedUrl} />
             <meta property="og:video:type" content="video/mp4" />
@@ -87,13 +97,13 @@ export default async function SingleContent({ params }) {
         />
         <meta
           name="twitter:card"
-          content={ogType === "video" ? "player" : "summary_large_image"}
+          content={ogType === "video.other" ? "player" : "summary_large_image"}
         />
         <meta name="twitter:title" content={metadata.title} />
         <meta name="twitter:description" content={metadata.description} />
         <meta name="twitter:image" content={metadata.tumb} />
 
-        {ogType === "video" && (
+        {ogType === "video.other" && (
           <>
             <meta name="twitter:player" content={metadata.uploadedUrl} />
             <meta name="twitter:player:width" content={metadata.width} />
@@ -110,8 +120,7 @@ export default async function SingleContent({ params }) {
 
     return (
       <>
-        {socialMediaMetaTags}{" "}
-        {/* Include the meta tags here for SEO/Social Preview */}
+        {socialMediaMetaTags} {/* Include the meta tags here for SEO/Social Preview */}
         <div>
           <MobileNavbar />
           <Share />
@@ -131,4 +140,4 @@ export default async function SingleContent({ params }) {
       </div>
     );
   }
-}
+      }
