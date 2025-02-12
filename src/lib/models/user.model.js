@@ -18,6 +18,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    adsLink: {
+      type: String,
+    },
     username: {
       type: String,
       required: true,

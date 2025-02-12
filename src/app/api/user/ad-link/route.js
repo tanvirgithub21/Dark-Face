@@ -9,6 +9,8 @@ export const POST = async (req) => {
     // Request থেকে JSON data পার্স করা
     const { userId, adsLink } = await req.json();
 
+    console.log({userId, adsLink})
+
     // Check if userId is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return new Response(

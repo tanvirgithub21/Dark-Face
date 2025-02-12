@@ -2,7 +2,7 @@
 import React, { useRef, useState } from "react";
 import { FaHome, FaUsers, FaBell } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
 
 const BottomNavbar = () => {
@@ -10,6 +10,10 @@ const BottomNavbar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const timerRef = useRef(null);
+
+  const { user } = useUser();
+
+  console.log(user?.publicMetadata?.userMongoId);
 
   const handleMouseDown = () => {
     timerRef.current = setTimeout(() => {
@@ -21,12 +25,29 @@ const BottomNavbar = () => {
     clearTimeout(timerRef.current);
   };
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (data) => {
-    console.log("Submitting:", data);
-    setIsModalOpen(false);
-    // Simulating API Call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    alert("Data Updated Successfully!");
+    if (!data && user?.publicMetadata?.userMongoId) return;
+  
+    setLoading(true); // লোডিং শুরু
+  
+    fetch("/api/user/ad-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user?.publicMetadata?.userMongoId,
+        adsLink: data,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data)
+        setInputValue("")
+        setIsModalOpen(false)
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false)); // লোডিং শেষ
   };
 
   return (
@@ -47,14 +68,13 @@ const BottomNavbar = () => {
             />
             <div className="flex justify-center gap-3 mt-4">
               <button
-                onClick={() => onSubmit(inputValue)}
+                onClick={() => handleSubmit(inputValue)}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md"
               >
-                Submit
+                {loading ? "Submitting..." : "Submit"}
               </button>
               <button
                 onClick={() => setIsModalOpen(false)}
-                onSubmit={handleSubmit}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg shadow-md"
               >
                 Close
@@ -104,28 +124,28 @@ const BottomNavbar = () => {
         </button>
 
         {/* Notifications Icon */}
-        <button
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onTouchStart={handleMouseDown}
-          onTouchEnd={handleMouseUp}
-          className="flex flex-col items-center relative"
-        >
-          <CgProfile
-            size={26}
-            className={
-              active === "notifications"
-                ? "text-blue-600"
-                : "text-gray-700 dark:text-gray-300"
-            }
-          />
-          {active === "notifications" && (
-            <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
-          )}
-          <p className="absolute top-0 ring-0 text-[10px] px-0.5 py-0 bg-yellow-300 rounded-2xl text-gray-950">
-            Hold
-          </p>
-        </button>
+        <SignedIn>
+          <button
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onTouchStart={handleMouseDown}
+            onTouchEnd={handleMouseUp}
+            onClick={() => setActive("profile")}
+            className="flex flex-col items-center relative"
+          >
+            <CgProfile
+              size={26}
+              className={
+                active === "notifications"
+                  ? "text-blue-600"
+                  : "text-gray-700 dark:text-gray-300"
+              }
+            />
+            {active === "profile" && (
+              <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
+            )}
+          </button>
+        </SignedIn>
 
         {/* Profile Section */}
         <SignedIn>
