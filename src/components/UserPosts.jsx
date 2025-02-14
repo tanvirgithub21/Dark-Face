@@ -9,6 +9,7 @@ import { BiLike } from "react-icons/bi";
 import { FaRegComment, FaClipboard } from "react-icons/fa";
 
 const UserPosts = ({ userId }) => {
+  const [copyStatus, setCopyStatus] = useState("Copy")
   const [posts, setPosts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [excludeIds, setExcludeIds] = useState([]);
@@ -97,9 +98,20 @@ const UserPosts = ({ userId }) => {
               <div className="w-[32%] h-8 flex justify-center items-center rounded-sm hover:bg-gray-700">
                 <FaRegComment className="mr-1 text-base" /> Comment
               </div>
-              <div onClick={handleCopyClick} className="w-[32%] h-8 flex justify-center items-center rounded-sm hover:bg-gray-700">
-                <FaClipboard className="mr-1 text-base" /> Share
-              </div>
+              <div
+              onClick={() => handleCopyClick(post._id)}
+              className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm hover:bg-gray-700"
+            >
+              {copyStatus === "Copied!" ? (
+                <p className="flex justify-center items-center">
+                  Copied! <FaClipboard className="ml-1 text-base" />
+                </p>
+              ) : (
+                <p className="flex justify-center items-center">
+                  Share <FaClipboard className="ml-1 text-base" />
+                </p>
+              )}
+            </div>
             </div>
           </div>
         ))}
