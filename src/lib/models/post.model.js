@@ -38,6 +38,9 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    adsLink: {
+      type: String,
+    },
     adult: {
       type: Boolean,
       default: true,

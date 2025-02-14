@@ -20,8 +20,6 @@ let activeVideo = null;
 export default function TestVideoPlayer({ data, isActive }) {
   const { uploadedUrl, name, text, profileImg, height } = data;
 
-  console.log(data)
-
   const videoRef = useRef(null);
   const hideControlsTimeout = useRef(null);
 

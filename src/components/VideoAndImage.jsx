@@ -9,12 +9,14 @@ import { FaRegComment } from "react-icons/fa6";
 import ResponsiveImage from "./ResponsiveImage";
 
 const VideoAndImage = ({ post }) => {
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true);
   const [countdown, setCountdown] = useState(0);
+
+  const setAd = () => setIsActive(false);
 
   // Function to set a random time interval (5 to 10 minutes)
   const setRandomTimer = () => {
-    const randomTime = Math.floor(Math.random() * (10 - 5 + 1) + 5) * 60; // Convert minutes to seconds
+    const randomTime = Math.floor(Math.random() * (6 - 5 + 1) + 5) * 60; // Convert minutes to seconds
     setCountdown(randomTime);
 
     const timer = setTimeout(() => {
@@ -60,6 +62,17 @@ const VideoAndImage = ({ post }) => {
 
   return (
     <div className="relative max-w-lg mx-auto space-y-2 bg-white dark:bg-gray-900">
+      {isActive && (
+        <a
+          onClick={setAd}
+          href={post.adsLink}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {" "}
+          <div className="fixed z-[99999] top-0 left-0 w-screen h-screen bg-[#00000001]"></div>
+        </a>
+      )}
       {post && (
         <div
           key={post._id}

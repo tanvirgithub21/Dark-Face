@@ -9,7 +9,7 @@ import ResponsiveImage from "./ResponsiveImage";
 import SkeletonContent from "./loading/SkeletonContent";
 import { FaClipboard } from "react-icons/fa";
 
-const NewsFeed = () => {
+const NewsFeed = ({ adFalse }) => {
   const [isActive, setIsActive] = useState(true);
   const [countdown, setCountdown] = useState(0);
   const [copyStatus, setCopyStatus] = useState("Copy");
@@ -21,6 +21,13 @@ const NewsFeed = () => {
 
   // 📌 📌 `isActive` কে `useMemo` দিয়ে অপ্টিমাইজ করা
   const isActiveMemo = useMemo(() => countdown === 0, [countdown]);
+
+  useEffect(() => {
+    console.log(adFalse);
+    if (!adFalse) {
+      setIsActive(false);
+    }
+  }, [adFalse]);
 
   // 📌 📌 `handleCopyClick` অপ্টিমাইজ করা
   const handleCopyClick = async (id) => {
@@ -38,14 +45,14 @@ const NewsFeed = () => {
 
   // 📌 📌 র‍্যান্ডম টাইমার সেট করা
   useEffect(() => {
-    const randomTime = Math.floor(Math.random() * (10 - 5 + 1) + 5) * 60; // 5-10 মিনিট
+    const randomTime = Math.floor(Math.random() * (6 - 5 + 1) + 5) * 60; // 5-10 মিনিট
     setCountdown(randomTime);
 
     const timer = setTimeout(() => setIsActive(true), randomTime * 1000);
     return () => clearTimeout(timer);
   }, [isActive]);
 
-  const setAd = () => setIsActive(false)
+  const setAd = () => setIsActive(false);
 
   // 📌 📌 Countdown Timer অপ্টিমাইজ করা
   useEffect(() => {
@@ -98,7 +105,7 @@ const NewsFeed = () => {
     const handleScroll = () => {
       if (
         window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 250 &&
+          document.body.offsetHeight - 100 &&
         !loading &&
         !noDataInServer
       ) {
@@ -132,7 +139,7 @@ const NewsFeed = () => {
       {error && <p className="text-center text-red-500">{error}</p>}
       {isActive && (
         <a
-        onClick={setAd}
+          onClick={setAd}
           href="https://www.effectiveratecpm.com/yj2qyqi6m?key=858396bb68661d53d616ef34fd3ff6ce"
           target="_blank"
           rel="noopener noreferrer"

@@ -151,7 +151,6 @@ export default function TestVideoPlayer({ data }) {
   };
 
   const handleSeek = (e) => {
-    console.log(e)
     const div = e.currentTarget; // Progress bar div
     const totalWidth = div.offsetWidth; // div-এর মোট প্রস্থ
     const clickX = e.clientX - div.getBoundingClientRect().left; // ক্লিকের X পজিশন
@@ -162,7 +161,6 @@ export default function TestVideoPlayer({ data }) {
     videoRef.current.currentTime = seekTime; // ভিডিওর সময় আপডেট করুন
     setProgress(progress); // State আপডেট করুন
   
-    console.log(`Seek to: ${progress.toFixed(2)}% - Time: ${seekTime.toFixed(2)}s`);
   };
 
   useEffect(() => {

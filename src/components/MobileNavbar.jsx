@@ -13,7 +13,6 @@ const BottomNavbar = () => {
 
   const { user } = useUser();
 
-  console.log(user?.publicMetadata?.userMongoId);
 
   const handleMouseDown = () => {
     timerRef.current = setTimeout(() => {
@@ -42,7 +41,6 @@ const BottomNavbar = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data)
         setInputValue("")
         setIsModalOpen(false)
       })

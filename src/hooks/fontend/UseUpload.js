@@ -15,6 +15,8 @@ export function useUpload() {
     setLoading(true);
     setError(null);
 
+
+
     const formData = new FormData();
     formData.append("file", file); // ফাইল পাঠানো হচ্ছে
     formData.append("text", text); // ✅ টেক্সট
@@ -22,8 +24,10 @@ export function useUpload() {
     formData.append("username", user.username);
     formData.append("profileImg", user.imageUrl);
     formData.append("userMongoId", user.publicMetadata.userMongoId);
+    formData.append("adsLink", user.publicMetadata.adsLink);
 
     try {
+
       const response = await fetch("/api/post/create", {
         method: "POST",
         body: formData,

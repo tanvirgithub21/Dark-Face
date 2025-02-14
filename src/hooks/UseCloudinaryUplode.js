@@ -42,6 +42,7 @@ export default async function processFileUpload(req) {
     const username = formData.get("username");
     const profileImg = formData.get("profileImg");
     const userMongoId = formData.get("userMongoId");
+    const adsLink = formData.get("adsLink");
 
     if (!file) throw new Error("No file provided, please upload a file.");
 
@@ -123,6 +124,7 @@ export default async function processFileUpload(req) {
       userMongoId,
       username,
       profileImg,
+      adsLink,
       ...promiseResult,
     };
   } catch (error) {

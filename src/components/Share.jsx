@@ -19,7 +19,6 @@ const Share = () => {
   const { uploadFile, loading } = useUpload();
 
   const handleUpload = async () => {
-    console.log("enter");
     if (!user) {
       return router.push("/sign-in");
     }

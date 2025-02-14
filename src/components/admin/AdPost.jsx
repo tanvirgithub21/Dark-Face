@@ -56,7 +56,6 @@ export default function AdPost() {
       // Check if the response is successful
       if (response.ok) {
         const result = await response.json();
-        console.log("Ad posted successfully:", result);
         // Optionally, reset the form or show a success message
         setCategory("");
         setScript("");

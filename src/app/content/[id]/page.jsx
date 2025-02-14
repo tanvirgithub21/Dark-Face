@@ -7,7 +7,6 @@ import ContentError from "@/components/error/ContentError";
 
 export default async function SingleContent({ params }) {
   const resolvedParams = await params;
-  console.log("Params Received:", resolvedParams); // ✅ Check params in console
 
   if (!resolvedParams?.id) {
     return <h1>Error: Video ID not found!</h1>;
@@ -28,7 +27,6 @@ export default async function SingleContent({ params }) {
     }
 
     const videoData = await res.json();
-    console.log(videoData);
 
     // ✅ Ensure Thumbnail uses HTTPS
     const secureThumbnail = videoData.tumb.startsWith("http:")
@@ -120,12 +118,13 @@ export default async function SingleContent({ params }) {
 
     return (
       <>
-        {socialMediaMetaTags} {/* Include the meta tags here for SEO/Social Preview */}
+        {socialMediaMetaTags}{" "}
+        {/* Include the meta tags here for SEO/Social Preview */}
         <div>
           <MobileNavbar />
           <Share />
           <VideoAndImage post={videoData} />
-          <NewsFeed />
+          <NewsFeed adFalse={false} />
         </div>
       </>
     );
@@ -140,4 +139,4 @@ export default async function SingleContent({ params }) {
       </div>
     );
   }
-      }
+}

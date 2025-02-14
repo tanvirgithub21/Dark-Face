@@ -22,7 +22,6 @@ export default function AddPost() {
   };
 
   const handleUpload = async () => {
-    console.log({ title, files });
     setAllFilePostLoading(true);
     setProgress(0);
 
@@ -43,13 +42,11 @@ export default function AddPost() {
         const newProgress = Math.round((uploadedCount / files.length) * 100);
         setProgress(newProgress); // Update progress
 
-        console.log(`Uploaded: ${file.name} (${newProgress}%)`);
 
         // Wait for 5 seconds before uploading next file
         await new Promise((resolve) => setTimeout(resolve, 5000));
       }
 
-      console.log("All files uploaded successfully");
       setAllFilePostLoading(false);
     } catch (error) {
       console.error("Error uploading files:", error);
