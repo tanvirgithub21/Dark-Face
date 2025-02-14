@@ -4,6 +4,7 @@ import { FaHome, FaUsers, FaBell } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
 import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 const BottomNavbar = () => {
   const [active, setActive] = useState("home");
@@ -12,7 +13,6 @@ const BottomNavbar = () => {
   const timerRef = useRef(null);
 
   const { user } = useUser();
-
 
   const handleMouseDown = () => {
     timerRef.current = setTimeout(() => {
@@ -28,9 +28,9 @@ const BottomNavbar = () => {
 
   const handleSubmit = async (data) => {
     if (!data && user?.publicMetadata?.userMongoId) return;
-  
+
     setLoading(true); // লোডিং শুরু
-  
+
     fetch("/api/user/ad-link", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -41,8 +41,8 @@ const BottomNavbar = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        setInputValue("")
-        setIsModalOpen(false)
+        setInputValue("");
+        setIsModalOpen(false);
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false)); // লোডিং শেষ
@@ -83,22 +83,24 @@ const BottomNavbar = () => {
       )}
       <div className="flex justify-around items-center">
         {/* Home Icon */}
-        <button
-          onClick={() => setActive("home")}
-          className="flex flex-col items-center"
-        >
-          <FaHome
-            size={26}
-            className={
-              active === "home"
-                ? "text-blue-600"
-                : "text-gray-700 dark:text-gray-300"
-            }
-          />
-          {active === "home" && (
-            <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
-          )}
-        </button>
+        <Link href="/">
+          <button
+            onClick={() => setActive("home")}
+            className="flex flex-col items-center"
+          >
+            <FaHome
+              size={26}
+              className={
+                active === "home"
+                  ? "text-blue-600"
+                  : "text-gray-700 dark:text-gray-300"
+              }
+            />
+            {active === "home" && (
+              <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
+            )}
+          </button>{" "}
+        </Link>
 
         {/* Friends Icon */}
         <button
@@ -123,26 +125,28 @@ const BottomNavbar = () => {
 
         {/* Notifications Icon */}
         <SignedIn>
-          <button
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onTouchStart={handleMouseDown}
-            onTouchEnd={handleMouseUp}
-            onClick={() => setActive("profile")}
-            className="flex flex-col items-center relative"
-          >
-            <CgProfile
-              size={26}
-              className={
-                active === "notifications"
-                  ? "text-blue-600"
-                  : "text-gray-700 dark:text-gray-300"
-              }
-            />
-            {active === "profile" && (
-              <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
-            )}
-          </button>
+          <Link href={`/profile/${user?.publicMetadata?.userMongoId}`}>
+            <button
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onTouchStart={handleMouseDown}
+              onTouchEnd={handleMouseUp}
+              onClick={() => setActive("profile")}
+              className="flex flex-col items-center relative"
+            >
+              <CgProfile
+                size={26}
+                className={
+                  active === "notifications"
+                    ? "text-blue-600"
+                    : "text-gray-700 dark:text-gray-300"
+                }
+              />
+              {active === "profile" && (
+                <div className="w-6 h-1 bg-blue-600 rounded-full mt-1"></div>
+              )}
+            </button>
+          </Link>
         </SignedIn>
 
         {/* Profile Section */}
