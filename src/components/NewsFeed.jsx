@@ -24,7 +24,7 @@ const NewsFeed = ({ adFalse }) => {
 
   useEffect(() => {
     console.log(adFalse);
-    if (!adFalse) {
+    if (adFalse) {
       setIsActive(false);
     }
   }, [adFalse]);
