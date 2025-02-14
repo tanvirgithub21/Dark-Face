@@ -14,6 +14,20 @@ const UserPosts = ({ userId }) => {
   const [excludeIds, setExcludeIds] = useState([]);
   const [isClient, setIsClient] = useState(false); // ✅ Fix Hydration Issue
 
+// 📌 📌 `handleCopyClick` অপ্টিমাইজ করা
+  const handleCopyClick = async (id) => {
+    try {
+      await navigator.clipboard.writeText(
+        `https://dark-face.vercel.app/content/${id}`
+      );
+      setCopyStatus("Copied!");
+      setTimeout(() => setCopyStatus("Copy"), 2000);
+    } catch (err) {
+      setCopyStatus("Failed to copy!");
+      console.error("Copy failed: ", err);
+    }
+  };
+  
   useEffect(() => {
     setIsClient(true); // ✅ Ensure component runs only on the client
     fetchPosts();
@@ -83,7 +97,7 @@ const UserPosts = ({ userId }) => {
               <div className="w-[32%] h-8 flex justify-center items-center rounded-sm hover:bg-gray-700">
                 <FaRegComment className="mr-1 text-base" /> Comment
               </div>
-              <div className="w-[32%] h-8 flex justify-center items-center rounded-sm hover:bg-gray-700">
+              <div onClick={handleCopyClick} className="w-[32%] h-8 flex justify-center items-center rounded-sm hover:bg-gray-700">
                 <FaClipboard className="mr-1 text-base" /> Share
               </div>
             </div>
