@@ -124,7 +124,7 @@ export default async function SingleContent({ params }) {
           <MobileNavbar />
           <Share />
           <VideoAndImage post={videoData} />
-          <NewsFeed adFalse={false} />
+          <NewsFeed adFalse={true} />
         </div>
       </>
     );
