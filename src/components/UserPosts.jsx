@@ -1,4 +1,4 @@
-"use client";  // Add this line
+"use client";
 
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -9,13 +9,13 @@ import { BiLike } from "react-icons/bi";
 import { FaRegComment, FaClipboard } from "react-icons/fa";
 
 const UserPosts = ({ userId }) => {
-  const [copyStatus, setCopyStatus] = useState("Copy")
+  const [copyStatus, setCopyStatus] = useState("Copy");
   const [posts, setPosts] = useState([]);
   const [hasMore, setHasMore] = useState(true);
-  const [excludeIds, setExcludeIds] = useState([]);
+  const [excludeIds, setExcludeIds] = useState(new Set()); // ✅ Set for unique IDs
   const [isClient, setIsClient] = useState(false); // ✅ Fix Hydration Issue
 
-// 📌 📌 `handleCopyClick` অপ্টিমাইজ করা
+  // 📌 📌 `handleCopyClick` অপ্টিমাইজ করা
   const handleCopyClick = async (id) => {
     try {
       await navigator.clipboard.writeText(
@@ -28,7 +28,7 @@ const UserPosts = ({ userId }) => {
       console.error("Copy failed: ", err);
     }
   };
-  
+
   useEffect(() => {
     setIsClient(true); // ✅ Ensure component runs only on the client
     fetchPosts();
@@ -37,17 +37,24 @@ const UserPosts = ({ userId }) => {
   const fetchPosts = async () => {
     try {
       const res = await fetch(
-        `/api/post/profile?userId=${userId}&excludeIds=${JSON.stringify(excludeIds)}`
+        `/api/post/profile?userId=${userId}&excludeIds=${JSON.stringify([...excludeIds])}`
       );
       const data = await res.json();
 
-      if (data.posts.length === 0) {
+      if (!data.posts.length) {
         setHasMore(false);
         return;
       }
 
-      setPosts((prev) => [...prev, ...data.posts]);
-      setExcludeIds((prev) => [...prev, ...data.posts.map((post) => post._id)]);
+      // ✅ ডুপ্লিকেট ফিল্টার করা
+      const newPosts = data.posts.filter((post) => !excludeIds.has(post._id));
+
+      setPosts((prev) => {
+        const allPosts = [...prev, ...newPosts];
+        return Array.from(new Map(allPosts.map((p) => [p._id, p])).values());
+      });
+
+      setExcludeIds((prev) => new Set([...prev, ...newPosts.map((post) => post._id)]));
     } catch (error) {
       console.error("Error fetching posts:", error);
     }
@@ -99,19 +106,19 @@ const UserPosts = ({ userId }) => {
                 <FaRegComment className="mr-1 text-base" /> Comment
               </div>
               <div
-              onClick={() => handleCopyClick(post._id)}
-              className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm hover:bg-gray-700"
-            >
-              {copyStatus === "Copied!" ? (
-                <p className="flex justify-center items-center">
-                  Copied! <FaClipboard className="ml-1 text-base" />
-                </p>
-              ) : (
-                <p className="flex justify-center items-center">
-                  Share <FaClipboard className="ml-1 text-base" />
-                </p>
-              )}
-            </div>
+                onClick={() => handleCopyClick(post._id)}
+                className="w-[32%] h-8 flex justify-center items-center rounded-sm text-sm hover:bg-gray-700"
+              >
+                {copyStatus === "Copied!" ? (
+                  <p className="flex justify-center items-center">
+                    Copied! <FaClipboard className="ml-1 text-base" />
+                  </p>
+                ) : (
+                  <p className="flex justify-center items-center">
+                    Share <FaClipboard className="ml-1 text-base" />
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         ))}

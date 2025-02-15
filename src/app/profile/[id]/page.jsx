@@ -1,4 +1,5 @@
 "use client";
+import Loader from "@/components/Loader";
 import UserPosts from "@/components/UserPosts";
 import { useEffect, useState } from "react";
 import { FaCamera, FaCommentDots, FaUserPlus } from "react-icons/fa";
@@ -56,30 +57,55 @@ function TabsContent({ value, activeTab, children }) {
   ) : null;
 }
 
-export default function ProfilePage({ params }) {
-  const [id, setId] = useState(false);
-  console.log(params);
+// ✅ ইউজারের তথ্য ফেচ করার ফাংশন (API Call)
+const fetchUserById = async (userId) => {
+  try {
+    const res = await fetch(`/api/user/get?userId=${userId}`);
 
-  useEffect(() => {
-    async function fetchData() {
-      const resolvedParams = await params;
-      console.log("Resolved Params:", resolvedParams);
-      if (resolvedParams?.id) {
-        setId(resolvedParams.id);
-      }
+    if (!res.ok) {
+      throw new Error(`Error: ${res.status}`);
     }
 
-    fetchData();
+    return await res.json();
+  } catch (error) {
+    console.error("Failed to fetch user:", error.message);
+    return null;
+  }
+};
+
+export default function ProfilePage({ params }) {
+  const [id, setId] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+  const [activeTab, setActiveTab] = useState("posts");
+
+  useEffect(() => {
+    if (params?.id) {
+      setId(params.id);
+    }
   }, [params]);
 
-  const [activeTab, setActiveTab] = useState("posts");
+  useEffect(() => {
+    if (id) {
+      fetchUserById(id).then((data) => {
+        if (data) {
+          setUserInfo(data);
+        }
+      });
+    }
+  }, [id]);
+
+  console.log({ userInfo });
+
+  if (!userInfo?._id) {
+    return <Loader />;
+  }
 
   return (
     <div className=" mt-[57px] w-full min-h-screen mx-auto p-3 sm:p-4 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg shadow-md">
       {/* Cover Photo */}
       <div className="relative h-32 sm:h-40 w-full bg-gray-300 dark:bg-gray-700 rounded-lg overflow-hidden">
         <img
-          src="/cover.jpg"
+          src={userInfo?.avatar}
           alt="Cover"
           className="h-full w-full object-cover"
         />
@@ -92,7 +118,7 @@ export default function ProfilePage({ params }) {
       <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-[-30px] sm:mt-[-40px] p-3 sm:p-4 text-center sm:text-left">
         <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full border-3 sm:border-4 border-white dark:border-gray-700 overflow-hidden">
           <img
-            src="/profile.jpg"
+            src={userInfo?.avatar}
             alt="Profile"
             className="w-full h-full object-cover"
           />
@@ -101,9 +127,14 @@ export default function ProfilePage({ params }) {
           </button>
         </div>
         <div>
-          <h2 className="text-lg sm:text-xl font-bold">John Doe</h2>
+          <h2 className="text-lg sm:text-xl font-bold">
+            {userInfo?.firstName + " " + userInfo?.lastName || "Unknown User"}
+          </h2>
           <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
-            Content Creator
+            {userInfo?.bio || "No bio available"}
+          </p>
+          <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm">
+            {userInfo?.adsLink || "No ads available"}
           </p>
           <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 mt-2">
             <Button className="flex items-center justify-center gap-1">
