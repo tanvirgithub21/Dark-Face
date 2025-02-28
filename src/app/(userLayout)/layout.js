@@ -1,4 +1,3 @@
-import AdComponent from "@/components/AdComponent";
 import { ClerkProvider } from "@clerk/nextjs";
 import Head from "next/head";
 

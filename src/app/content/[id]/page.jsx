@@ -4,6 +4,7 @@ import VideoAndImage from "@/components/VideoAndImage";
 import MobileNavbar from "@/components/MobileNavbar";
 import Head from "next/head";
 import ContentError from "@/components/error/ContentError";
+import AdsComponent from "@/components/ads/AdsComponent";
 
 export default async function SingleContent({ params }) {
   const resolvedParams = await params;
@@ -123,7 +124,9 @@ export default async function SingleContent({ params }) {
         <div>
           <MobileNavbar />
           <Share />
-          <VideoAndImage post={videoData} />
+          <AdsComponent>
+            <VideoAndImage post={videoData} />
+          </AdsComponent>
           <NewsFeed adFalse={true} />
         </div>
       </>
@@ -134,7 +137,9 @@ export default async function SingleContent({ params }) {
       <div className="w-full min-h-screen ">
         <MobileNavbar />
         <Share />
-        <ContentError />
+        <AdsComponent>
+          <ContentError />
+        </AdsComponent>
         <NewsFeed />
       </div>
     );
